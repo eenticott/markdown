@@ -1,9 +1,6 @@
 ---
-title: "Profiling and Debugging"
-author: "Euan Enticott"
-date: "14/12/2020"
+title: "Profiling and Debugging2"
 output: html_document
-always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}

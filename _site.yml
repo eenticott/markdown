@@ -1,12 +1,11 @@
-name: "cars"
+name: "markdown"
 output_dir: "docs"
 navbar:
-  title: "Cars"
+  title: "RMARKDOWN"
   left:
-  - text: "Home"
-   href: index.html
-  - text: "Speed and Distance"
-   href: debugging.html
+  - text: "Index"
+    href: index.html
+  - text: "Profiling and Debugging"
+    href: debugging.html
 output:
   html_document:
- theme: cosmo
