@@ -1,11 +1,10 @@
 ---
 title: "Profiling and Debugging"
-author: "Euan Enticott"
-date: "14/12/2020"
 output: 
   html_document:
     toc: true
     toc_float: true
+    collapsed: false
 always_allow_html: true
 ---
 
@@ -134,6 +133,8 @@ source("prime_factors2.R", keep.source = TRUE)
 profvis(prime_factors2(12416515098))
 ```
 
+We see that the first prime factors function runs faster and spends the majority of the time in the while loop and in the recursive part of the function which we would expect. In the second implementation the majority of time is spent in the while loop and checking if `i` divides `r`. These steps are both done together in the first implementation.  It is clear that the first implementation is more efficient.
+
 ## Performance
 R code is often not optimal in terms of performance, writing in C would run faster. For many core operations R delegates the task to routines written in C.
 
@@ -143,7 +144,5 @@ A main feature of R is its pass-by-value semantics. This makes the language easy
 ### Column-major storage
 When a matrix is stored in memory it is typically mapped to a contiguous block of memory. This is done by coloum-major or row-major storage. R uses column-major order, which means that elements in each column are stored in contiguous blocks. This has an implication on performance. For example a matrix filled by row will take longer than a matrix stored by column. This is because reading and writing memory in contiguous blocks is faster than reading memory in seperate locations. 
 
-### Example
-
 ### Code in another languague
-It is possible to call cdoe that is written in another language (for example C) from `R` using the `Rcpp` function. This is an important way to imrpove performance.
+It is possible to call code that is written in another language (for example C) from `R` using the `Rcpp` function. This is an important way to improve performance.

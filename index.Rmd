@@ -3,4 +3,7 @@ title: "Index"
 output: html_document
 ---
 
-Hello this is the index page
+Welcome to my second portfolio submission. It contains the following pages:
+
+- [debugging](.\docs\debugging.html) First entry
+- [matrices](.\docs\matrices.html) Second entry

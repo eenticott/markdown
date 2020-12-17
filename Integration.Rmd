@@ -1,11 +1,10 @@
 ---
 title: "Integration"
-author: "Euan Enticott"
-date: "16/12/2020"
 output: 
   html_document:
     toc: true
     toc_float: true
+    collapsed: false    
 ---
 
 ```{r setup, include=FALSE}
@@ -77,7 +76,7 @@ where $f_{i}$ is $f$ on $[a + (i-1)h,a+ih]$ and $h = \frac{b-a}{m}$.
 Guassian quadrature is similar to Chebyshev points in that it exploits the freedom of interpolation points ot reduce the error of the approximate integral in the form:
 $$ I = \int_{a}^{n}f(x)w(x)dx $$
 where $w$ is continuous and positive on $(a,b)$ and $\forall n \in \mathbb{N},\int_{a}^{b}x^{n}w(x)dx$ is finite.  Defining the function space:
-$$L_{w}^{2}([a,b]) := \Big{ \{ } f:\int_{a}^{b} f(x)^{2}w(x)dx < \infty \Big{ \} } $$
+$$ L_{w}^{2}([a,b]) := \Big{\{} f: \int_{a}^{b} f(x)^{2}w(x)dx < \infty \Big{\}} $$
 There exists a unique sequencce of orthogonal polynomials $p_{0},p_{1},...$ in $L_{w}^{2}([a,b])$ that are monic. These can be found using the **Gram-Schmidt process**. We choose the interpolation points as the $k$ roots of $p_{k}$ for the Gaussian quadrature rule.
 
 ### Practical algorithms
@@ -87,12 +86,12 @@ The methods above can be enhanced by various adaptations and practical error est
 Consider an integral over $D = [a_{1}, b_{1}] \times ... \times [a_{d}, b_{d}]$:
 $$I(f) = \int_{D} f(x_{1},...,x_{d})d(x_{1},...,x_{d}).$$
 According to Fubini's Theorem, and letting $D' = [a_{2}, b_{2}] \times ... \times [a_{d}, b_{d}]$ can often rewrite $I(f)$ as an iterated integral:
-$$I(f) = \int_{a_{1}}^{b_{1} \int_{D'} f(x_{1},...,x_{d})d(x_{2},...,x_{d})dx_{1} = \int_{a_{1}}^{b_{1}g(x_{1})dx_{1} $$
+$$ I(f) = \int_{a_{1}}^{b_{1}} \int_{D'} f(x_{1},...,x_{d}) d(x_{2},...,x_{d}) dx_{1} = \int_{a_{1}}^{b_{1}}g(x_{1}) dx_{1} $$
 We develop a recursive algorithm using an approximation of $g$ to approximate $I(f)$. 
 
 $$\hat{I}(f) = \sum_{i=1}^k \hat{g}(x_1^{(i)}) \int_{a_1}^{b_1} \ell_i(x_1) {\rm d}x_1, $$
 
-where $\hat{g}(x_{1}) = \hat{I}(h_{x_{1}}).
+where $\hat{g}(x_{1}) = \hat{I}(h_{x_{1}})$.
 
 ## Monte Carlo integration
 
@@ -104,7 +103,7 @@ $$ \pi(f) := \int_{X}f(x)\pi(dx), $$
 where $f \in L_{1}(X, \pi) = \{f:\pi(|f|) < \infty \}$. This is equivalent to $\pi(f)$ is the expectation of $f(X)$ when $X \sim \pi$.
 
 ### Fundamental results:
-Let $(X_{n})_{n \meq 1}$ be a sequence of i.i.d. random variables distributed according to $\mu$. Define:
+Let $(X_{n})_{n \geq 1}$ be a sequence of i.i.d. random variables distributed according to $\mu$. Define:
 $$S_{n}(f) := \sum_{i=1}^{n}f(X_{i}),$$
 for $f \in L_{1}(X, \mu).$ Then:
 $$\lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \mu(f), $$

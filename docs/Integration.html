@@ -9,7 +9,6 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Euan Enticott" />
 
 
 <title>Integration</title>
@@ -384,8 +383,6 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Integration</h1>
-<h4 class="author">Euan Enticott</h4>
-<h4 class="date">16/12/2020</h4>
 
 </div>
 
@@ -440,7 +437,7 @@ div.tocify {
 </div>
 <div id="gaussian-quadrature" class="section level3">
 <h3>Gaussian quadrature</h3>
-<p>Guassian quadrature is similar to Chebyshev points in that it exploits the freedom of interpolation points ot reduce the error of the approximate integral in the form: <span class="math display">\[ I = \int_{a}^{n}f(x)w(x)dx \]</span> where <span class="math inline">\(w\)</span> is continuous and positive on <span class="math inline">\((a,b)\)</span> and <span class="math inline">\(\forall n \in \mathbb{N},\int_{a}^{b}x^{n}w(x)dx\)</span> is finite. Defining the function space: <span class="math display">\[L_{w}^{2}([a,b]) := \Big{ \{ } f:\int_{a}^{b} f(x)^{2}w(x)dx &lt; \infty \Big{ \} } \]</span> There exists a unique sequencce of orthogonal polynomials <span class="math inline">\(p_{0},p_{1},...\)</span> in <span class="math inline">\(L_{w}^{2}([a,b])\)</span> that are monic. These can be found using the <strong>Gram-Schmidt process</strong>. We choose the interpolation points as the <span class="math inline">\(k\)</span> roots of <span class="math inline">\(p_{k}\)</span> for the Gaussian quadrature rule.</p>
+<p>Guassian quadrature is similar to Chebyshev points in that it exploits the freedom of interpolation points ot reduce the error of the approximate integral in the form: <span class="math display">\[ I = \int_{a}^{n}f(x)w(x)dx \]</span> where <span class="math inline">\(w\)</span> is continuous and positive on <span class="math inline">\((a,b)\)</span> and <span class="math inline">\(\forall n \in \mathbb{N},\int_{a}^{b}x^{n}w(x)dx\)</span> is finite. Defining the function space: <span class="math display">\[ L_{w}^{2}([a,b]) := \Big{\{} f: \int_{a}^{b} f(x)^{2}w(x)dx &lt; \infty \Big{\}} \]</span> There exists a unique sequencce of orthogonal polynomials <span class="math inline">\(p_{0},p_{1},...\)</span> in <span class="math inline">\(L_{w}^{2}([a,b])\)</span> that are monic. These can be found using the <strong>Gram-Schmidt process</strong>. We choose the interpolation points as the <span class="math inline">\(k\)</span> roots of <span class="math inline">\(p_{k}\)</span> for the Gaussian quadrature rule.</p>
 </div>
 <div id="practical-algorithms" class="section level3">
 <h3>Practical algorithms</h3>
@@ -448,9 +445,9 @@ div.tocify {
 </div>
 <div id="multiple-integrals" class="section level3">
 <h3>Multiple integrals</h3>
-<p>Consider an integral over <span class="math inline">\(D = [a_{1}, b_{1}] \times ... \times [a_{d}, b_{d}]\)</span>: <span class="math display">\[I(f) = \int_{D} f(x_{1},...,x_{d})d(x_{1},...,x_{d}).\]</span> According to Fubini’s Theorem, and letting <span class="math inline">\(D&#39; = [a_{2}, b_{2}] \times ... \times [a_{d}, b_{d}]\)</span> can often rewrite <span class="math inline">\(I(f)\)</span> as an iterated integral: <span class="math display">\[I(f) = \int_{a_{1}}^{b_{1} \int_{D&#39;} f(x_{1},...,x_{d})d(x_{2},...,x_{d})dx_{1} = \int_{a_{1}}^{b_{1}g(x_{1})dx_{1} \]</span> We develop a recursive algorithm using an approximation of <span class="math inline">\(g\)</span> to approximate <span class="math inline">\(I(f)\)</span>.</p>
+<p>Consider an integral over <span class="math inline">\(D = [a_{1}, b_{1}] \times ... \times [a_{d}, b_{d}]\)</span>: <span class="math display">\[I(f) = \int_{D} f(x_{1},...,x_{d})d(x_{1},...,x_{d}).\]</span> According to Fubini’s Theorem, and letting <span class="math inline">\(D&#39; = [a_{2}, b_{2}] \times ... \times [a_{d}, b_{d}]\)</span> can often rewrite <span class="math inline">\(I(f)\)</span> as an iterated integral: <span class="math display">\[ I(f) = \int_{a_{1}}^{b_{1}} \int_{D&#39;} f(x_{1},...,x_{d}) d(x_{2},...,x_{d}) dx_{1} = \int_{a_{1}}^{b_{1}}g(x_{1}) dx_{1} \]</span> We develop a recursive algorithm using an approximation of <span class="math inline">\(g\)</span> to approximate <span class="math inline">\(I(f)\)</span>.</p>
 <p><span class="math display">\[\hat{I}(f) = \sum_{i=1}^k \hat{g}(x_1^{(i)}) \int_{a_1}^{b_1} \ell_i(x_1) {\rm d}x_1, \]</span></p>
-<p>where $(x_{1}) = (h_{x_{1}}).</p>
+<p>where <span class="math inline">\(\hat{g}(x_{1}) = \hat{I}(h_{x_{1}})\)</span>.</p>
 </div>
 </div>
 <div id="monte-carlo-integration" class="section level2">
@@ -460,7 +457,7 @@ div.tocify {
 <p>where <span class="math inline">\(f \in L_{1}(X, \pi) = \{f:\pi(|f|) &lt; \infty \}\)</span>. This is equivalent to <span class="math inline">\(\pi(f)\)</span> is the expectation of <span class="math inline">\(f(X)\)</span> when <span class="math inline">\(X \sim \pi\)</span>.</p>
 <div id="fundamental-results" class="section level3">
 <h3>Fundamental results:</h3>
-<p>Let <span class="math inline">\((X_{n})_{n \meq 1}\)</span> be a sequence of i.i.d. random variables distributed according to <span class="math inline">\(\mu\)</span>. Define: <span class="math display">\[S_{n}(f) := \sum_{i=1}^{n}f(X_{i}),\]</span> for <span class="math inline">\(f \in L_{1}(X, \mu).\)</span> Then: <span class="math display">\[\lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \mu(f), \]</span></p>
+<p>Let <span class="math inline">\((X_{n})_{n \geq 1}\)</span> be a sequence of i.i.d. random variables distributed according to <span class="math inline">\(\mu\)</span>. Define: <span class="math display">\[S_{n}(f) := \sum_{i=1}^{n}f(X_{i}),\]</span> for <span class="math inline">\(f \in L_{1}(X, \mu).\)</span> Then: <span class="math display">\[\lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \mu(f), \]</span></p>
 <p>We call this a Monte Carlo approximation of <span class="math inline">\(\mu(f)\)</span>. This is an unbiased estimator. The variance of this estimate is <span class="math inline">\(\frac{\mu(f^{2}) - \mu(f)^{2}}{n}\)</span>.</p>
 <p>Central limit theroem: If <span class="math inline">\(f \in L_{2}(X, \mu)\)</span> then: <span class="math display">\[n^{1/2}\{n^{-1}S_{n}(f) - \mu(f) \} \rightarrow X \sim N(0, \mu(\bar{f}^{2})) ,\]</span> where <span class="math inline">\(\bar{f}\)</span> = f - (f).</p>
 </div>
