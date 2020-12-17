@@ -8,6 +8,8 @@ navbar:
   - text: "Matrices"
     href: matrices.html
   - text: "Optimisation"
-    href: optimisation.html    
+    href: optimisation.html
+  - text: "Integration"
+    href: Integration.html    
 output:
   html_document:

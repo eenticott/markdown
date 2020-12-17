@@ -1,0 +1,131 @@
+---
+title: "Integration"
+author: "Euan Enticott"
+date: "16/12/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Integration
+
+### Quadrature
+Quadratue rules are essentially integral approximations that use a finite number of function evaluations. We will focus on approximating the definite integral of $f$ over $[a,b]$. For one dimensional integrals you can use `integrate` in R. For multiple integrals the `cubature` package can be used. These should provide more robust implementations.
+
+### Polynomial interpolation
+The **Weierstrass Approximation Theorem** states that for $f \in C^{0}([a,b])$ there is a sequence of polynomials $(p_{n})$ that converge uniformly to $f$ on $[a,b]$. This suggests that for a given tolerence there exists a polynomial that can be used to approximate a given $f$. 
+
+### Lagrange polynomials
+An approximation can be done useing lagrange polynomials. Consider approximating $f$ using $k$ points $\{(x_{i}, f(x_{i}))\}_{i=1}^{k}$. The interpolating polynomial is unique and has degree at most $k-1$, it can be expressed as a Lagrange polynomial:
+$$p_{k-1}(x) := \sum_{i=1}^{k}l_{i}(x)f(x_{i}),$$
+where the Lagrange polynomials are:
+$$l_{i}(x) = \prod_{j=1,j \neq i}\frac{x - x_{j}}{x_{i} - x_{j}} . $$
+
+### Polynomial interpolation error
+If $f$ has $k$ continuous derivatives and $p_{k=1}$ is the polynomial interpolating $f$ at $k$ points $x_{1},...,x_{k}$ then for any $x \in [a,b]$ there exists $\xi \in (a,b)$ such that:
+
+$$f(x) - p_{k-1}(x) = \frac{1}{k!}f^{k}(\xi)\prod_{i=1}^{k}(x-x_{i})$$
+This does not immediately provide a guarantee that a sequence of interpolating polynomials will converge uniformly or pointwise to $f$. There is however a sequence of interpolation points that guarantee uniform convergence. These are called Chebyshev points:
+$$ \frac{cos(2i-1)}{2k}\pi, \; i \in \{1,...,k \},$$
+This bounds the absolute value of the product term by $2^{1-k}$. There still exist functions that diverge on Chebyshev points but these are usually quite complex. These only apply to differentiable functions.
+
+### Composite polynomial interpolation
+An alternative approach to fitting a high degree polynomial to many points is to fit lower degree polynomials on subintervals of the domain. This results in a piecewise polynomial approximation. For simplicity we consider the region $[a,b]$ partitioned into equal length subintervals. The scheme is 'closed' if we inclue the endpoints and 'open' if we do not. Some examples are given below. For a large number of subintervals the product term in the Interpolation Error can be made very small.
+
+### Other polynomial interpolation schemes
+There are more polynomial interpolation schemes. You can use polynomials that incorporate derivatives of $f$ as well as $f$, this is known as Hermite interpolation. Matching derivatives at the boundaries of subintervals in piecewise polynomial interpolation is called spline interpolation. Cubic splines are a very popular way of approximating a function.
+
+### Polynomial integration
+We consider approximating the integral:
+$$I(f) := \int_{a}^{b}f(x)dx, $$
+where $f \in C^{0}([a,b])$. All approximations that we consider involve computing integrals associated with polynomial approximations such as we have considered above. The approximations are often referred to as *quadrature rules*.
+
+#### Changing limits of integration
+For constants $a < b$ and $c < d$ we can accomodate a change of finite interval via:
+$$ \int_{a}^{b}f(x)dx = \int_{c}^{d}g(y)dy, $$
+defining
+$$g(y) := \frac{b-a}{d-c}g \Big{(}a + \frac{b-a}{d-c}(y-c)\Big{)}. $$
+
+### Integrating the interpolating polynomial approximation
+If we have a Lagrange polynomial $p_{k-1}$ over [a,b] we have:
+$$I(p_{k-1}) = \sum_{i=1}^{k}f(x_{i})\int_{a}^{b}l_{i}(x) .$$
+We know $$l_{i}(x) = \prod_{j=1,j \neq i}\frac{x - x_{j}}{x_{i} - x_{j}} $$ so the integral approximation depends only on the choice of interpolating points. The $l_{i}$ can be complicated but are able to be integrated by hand for small $k$.
+
+### Newton-Cotes rules
+The *rectangular rule* corresponds to a closed scheme with $k = 1$:
+$$\hat{I}_{\rm rectangular}(f) = (b-a) f(a). $$
+The *midpoint rule* corresponds to an open scheme with $k=1$:
+$$\hat{I}_{\rm midpoint}(f) = (b-a) f \left ( \frac{a+b}{2} \right). $$
+The *trapezoidal rule* corresponds to a closed scheme with $k=2$:
+$$\hat{I}_{\rm trapezoidal}(f) = \frac{b-a}{2} \{ f(a)+f(b) \}. $$
+*Simpson's rule* corresponds to a closed scheme with $k=3$. We obtain:
+$$\hat{I}_{\rm Simpson}(f) = \frac{b-a}{6} \left \{ f(a) + 4 f \left ( \frac{a+b}{2} \right) + f(b) \right \}. $$
+
+It is possible to obtain a crude bound on the error of these schemes. We find that often the *midpoint* rule can perform better than the *trapezoid rule* even though it requires less points.
+
+### Composite rules
+When a composite polynomial interpolation is used the approximation is simply the sum of the integrals on each subinterval. Hence a composite Newton-Cotes rule is obtained by splitting $[a,b]$ into $m$ subintervals and summing the approximate intervals for each subinterval. 
+$$\hat{I}^m_{\rm rule}(f) = \sum_{i=1}^m \hat{I}_{\rm rule}(f_i), $$
+where $f_{i}$ is $f$ on $[a + (i-1)h,a+ih]$ and $h = \frac{b-a}{m}$.
+
+### Gaussian quadrature
+Guassian quadrature is similar to Chebyshev points in that it exploits the freedom of interpolation points ot reduce the error of the approximate integral in the form:
+$$ I = \int_{a}^{n}f(x)w(x)dx $$
+where $w$ is continuous and positive on $(a,b)$ and $\forall n \in \mathbb{N},\int_{a}^{b}x^{n}w(x)dx$ is finite.  Defining the function space:
+$$L_{w}^{2}([a,b]) := \Big{ \{ } f:\int_{a}^{b} f(x)^{2}w(x)dx < \infty \Big{ \} } $$
+There exists a unique sequencce of orthogonal polynomials $p_{0},p_{1},...$ in $L_{w}^{2}([a,b])$ that are monic. These can be found using the **Gram-Schmidt process**. We choose the interpolation points as the $k$ roots of $p_{k}$ for the Gaussian quadrature rule.
+
+### Practical algorithms
+The methods above can be enhanced by various adaptations and practical error estimation. They are designed to estimate bounds on the error and spend more computational effort in subintervals where the integral is estimated poorly. Defining a robust algorithm involves specifying change of variables for dealing with semi-infinite and infinite intervals. The weight function can also be varied to produce a better approximation. 
+
+### Multiple integrals
+Consider an integral over $D = [a_{1}, b_{1}] \times ... \times [a_{d}, b_{d}]$:
+$$I(f) = \int_{D} f(x_{1},...,x_{d})d(x_{1},...,x_{d}).$$
+According to Fubini's Theorem, and letting $D' = [a_{2}, b_{2}] \times ... \times [a_{d}, b_{d}]$ can often rewrite $I(f)$ as an iterated integral:
+$$I(f) = \int_{a_{1}}^{b_{1} \int_{D'} f(x_{1},...,x_{d})d(x_{2},...,x_{d})dx_{1} = \int_{a_{1}}^{b_{1}g(x_{1})dx_{1} $$
+We develop a recursive algorithm using an approximation of $g$ to approximate $I(f)$. 
+
+$$\hat{I}(f) = \sum_{i=1}^k \hat{g}(x_1^{(i)}) \int_{a_1}^{b_1} \ell_i(x_1) {\rm d}x_1, $$
+
+where $\hat{g}(x_{1}) = \hat{I}(h_{x_{1}}).
+
+## Monte Carlo integration
+
+Quadrature rules quickly become prohibitively expensive in high dimensional problems, we consider Monte Carlo algorithms for higher dimensions.
+
+Letting $(X, \mathcal{X})$ be a measurable space. We have target probability measure $\pi: \mathcal{X} \rightarrow [0,1]$ and want to approximate:
+$$ \pi(f) := \int_{X}f(x)\pi(dx), $$
+
+where $f \in L_{1}(X, \pi) = \{f:\pi(|f|) < \infty \}$. This is equivalent to $\pi(f)$ is the expectation of $f(X)$ when $X \sim \pi$.
+
+### Fundamental results:
+Let $(X_{n})_{n \meq 1}$ be a sequence of i.i.d. random variables distributed according to $\mu$. Define:
+$$S_{n}(f) := \sum_{i=1}^{n}f(X_{i}),$$
+for $f \in L_{1}(X, \mu).$ Then:
+$$\lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \mu(f), $$
+
+We call this a Monte Carlo approximation of $\mu(f)$. This is an unbiased estimator. The variance of this estimate is $\frac{\mu(f^{2}) - \mu(f)^{2}}{n}$.
+
+Central limit theroem: If $f \in L_{2}(X, \mu)$ then:
+$$n^{1/2}\{n^{-1}S_{n}(f) - \mu(f) \} \rightarrow X \sim N(0, \mu(\bar{f}^{2})) ,$$
+where $\bar{f}$ = f - \mu(f).
+
+### Error compared to quadrature
+This i sa slow convergence rate compared to quadrature rules in one dimension. Dimension does not directly affect convergence however $\bar{f}$ can be very large for large $d$.
+
+### Sampling
+There are several sampling methods available. If we can simulate random variates $\pi$ on a computer then this is called perfect sampling. 
+
+Another more applicable is rejection sampling. This applies when one can sample $\mu$-distributed random variates from proposal distribution $\mu$ and $\pi/\mu$ satisfies $\sup_{x\in X}\pi(x)/\mu(x) \leq M < \infty$.  The algorithm is:
+* Sample $X \sim \mu$
+
+* With probability $\frac{1}{M}\frac{\pi(X)}{\mu(X)}$ output X, otherwise go to step 1
+
+Rejection sampling works best when the proposal distribution is close to the true distribution but it is not required. In many practical applications $M$ is prohibitively large.
+
+We can also do importance sampling and self-normalized importance sampling.

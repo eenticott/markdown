@@ -2,7 +2,10 @@
 title: "Optimisation"
 author: "Euan Enticott"
 date: "15/12/2020"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}

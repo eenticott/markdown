@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Euan Enticott" />
+
+
+<title>Integration</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Portfolio 2</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="debugging.html">Profiling and Debugging</a>
+</li>
+<li>
+  <a href="matrices.html">Matrices</a>
+</li>
+<li>
+  <a href="optimisation.html">Optimisation</a>
+</li>
+<li>
+  <a href="Integration.html">Integration</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Integration</h1>
+<h4 class="author">Euan Enticott</h4>
+<h4 class="date">16/12/2020</h4>
+
+</div>
+
+
+<div id="integration" class="section level2">
+<h2>Integration</h2>
+<div id="quadrature" class="section level3">
+<h3>Quadrature</h3>
+<p>Quadratue rules are essentially integral approximations that use a finite number of function evaluations. We will focus on approximating the definite integral of <span class="math inline">\(f\)</span> over <span class="math inline">\([a,b]\)</span>. For one dimensional integrals you can use <code>integrate</code> in R. For multiple integrals the <code>cubature</code> package can be used. These should provide more robust implementations.</p>
+</div>
+<div id="polynomial-interpolation" class="section level3">
+<h3>Polynomial interpolation</h3>
+<p>The <strong>Weierstrass Approximation Theorem</strong> states that for <span class="math inline">\(f \in C^{0}([a,b])\)</span> there is a sequence of polynomials <span class="math inline">\((p_{n})\)</span> that converge uniformly to <span class="math inline">\(f\)</span> on <span class="math inline">\([a,b]\)</span>. This suggests that for a given tolerence there exists a polynomial that can be used to approximate a given <span class="math inline">\(f\)</span>.</p>
+</div>
+<div id="lagrange-polynomials" class="section level3">
+<h3>Lagrange polynomials</h3>
+<p>An approximation can be done useing lagrange polynomials. Consider approximating <span class="math inline">\(f\)</span> using <span class="math inline">\(k\)</span> points <span class="math inline">\(\{(x_{i}, f(x_{i}))\}_{i=1}^{k}\)</span>. The interpolating polynomial is unique and has degree at most <span class="math inline">\(k-1\)</span>, it can be expressed as a Lagrange polynomial: <span class="math display">\[p_{k-1}(x) := \sum_{i=1}^{k}l_{i}(x)f(x_{i}),\]</span> where the Lagrange polynomials are: <span class="math display">\[l_{i}(x) = \prod_{j=1,j \neq i}\frac{x - x_{j}}{x_{i} - x_{j}} . \]</span></p>
+</div>
+<div id="polynomial-interpolation-error" class="section level3">
+<h3>Polynomial interpolation error</h3>
+<p>If <span class="math inline">\(f\)</span> has <span class="math inline">\(k\)</span> continuous derivatives and <span class="math inline">\(p_{k=1}\)</span> is the polynomial interpolating <span class="math inline">\(f\)</span> at <span class="math inline">\(k\)</span> points <span class="math inline">\(x_{1},...,x_{k}\)</span> then for any <span class="math inline">\(x \in [a,b]\)</span> there exists <span class="math inline">\(\xi \in (a,b)\)</span> such that:</p>
+<p><span class="math display">\[f(x) - p_{k-1}(x) = \frac{1}{k!}f^{k}(\xi)\prod_{i=1}^{k}(x-x_{i})\]</span> This does not immediately provide a guarantee that a sequence of interpolating polynomials will converge uniformly or pointwise to <span class="math inline">\(f\)</span>. There is however a sequence of interpolation points that guarantee uniform convergence. These are called Chebyshev points: <span class="math display">\[ \frac{cos(2i-1)}{2k}\pi, \; i \in \{1,...,k \},\]</span> This bounds the absolute value of the product term by <span class="math inline">\(2^{1-k}\)</span>. There still exist functions that diverge on Chebyshev points but these are usually quite complex. These only apply to differentiable functions.</p>
+</div>
+<div id="composite-polynomial-interpolation" class="section level3">
+<h3>Composite polynomial interpolation</h3>
+<p>An alternative approach to fitting a high degree polynomial to many points is to fit lower degree polynomials on subintervals of the domain. This results in a piecewise polynomial approximation. For simplicity we consider the region <span class="math inline">\([a,b]\)</span> partitioned into equal length subintervals. The scheme is ‘closed’ if we inclue the endpoints and ‘open’ if we do not. Some examples are given below. For a large number of subintervals the product term in the Interpolation Error can be made very small.</p>
+</div>
+<div id="other-polynomial-interpolation-schemes" class="section level3">
+<h3>Other polynomial interpolation schemes</h3>
+<p>There are more polynomial interpolation schemes. You can use polynomials that incorporate derivatives of <span class="math inline">\(f\)</span> as well as <span class="math inline">\(f\)</span>, this is known as Hermite interpolation. Matching derivatives at the boundaries of subintervals in piecewise polynomial interpolation is called spline interpolation. Cubic splines are a very popular way of approximating a function.</p>
+</div>
+<div id="polynomial-integration" class="section level3">
+<h3>Polynomial integration</h3>
+<p>We consider approximating the integral: <span class="math display">\[I(f) := \int_{a}^{b}f(x)dx, \]</span> where <span class="math inline">\(f \in C^{0}([a,b])\)</span>. All approximations that we consider involve computing integrals associated with polynomial approximations such as we have considered above. The approximations are often referred to as <em>quadrature rules</em>.</p>
+<div id="changing-limits-of-integration" class="section level4">
+<h4>Changing limits of integration</h4>
+<p>For constants <span class="math inline">\(a &lt; b\)</span> and <span class="math inline">\(c &lt; d\)</span> we can accomodate a change of finite interval via: <span class="math display">\[ \int_{a}^{b}f(x)dx = \int_{c}^{d}g(y)dy, \]</span> defining <span class="math display">\[g(y) := \frac{b-a}{d-c}g \Big{(}a + \frac{b-a}{d-c}(y-c)\Big{)}. \]</span></p>
+</div>
+</div>
+<div id="integrating-the-interpolating-polynomial-approximation" class="section level3">
+<h3>Integrating the interpolating polynomial approximation</h3>
+<p>If we have a Lagrange polynomial <span class="math inline">\(p_{k-1}\)</span> over [a,b] we have: <span class="math display">\[I(p_{k-1}) = \sum_{i=1}^{k}f(x_{i})\int_{a}^{b}l_{i}(x) .\]</span> We know <span class="math display">\[l_{i}(x) = \prod_{j=1,j \neq i}\frac{x - x_{j}}{x_{i} - x_{j}} \]</span> so the integral approximation depends only on the choice of interpolating points. The <span class="math inline">\(l_{i}\)</span> can be complicated but are able to be integrated by hand for small <span class="math inline">\(k\)</span>.</p>
+</div>
+<div id="newton-cotes-rules" class="section level3">
+<h3>Newton-Cotes rules</h3>
+<p>The <em>rectangular rule</em> corresponds to a closed scheme with <span class="math inline">\(k = 1\)</span>: <span class="math display">\[\hat{I}_{\rm rectangular}(f) = (b-a) f(a). \]</span> The <em>midpoint rule</em> corresponds to an open scheme with <span class="math inline">\(k=1\)</span>: <span class="math display">\[\hat{I}_{\rm midpoint}(f) = (b-a) f \left ( \frac{a+b}{2} \right). \]</span> The <em>trapezoidal rule</em> corresponds to a closed scheme with <span class="math inline">\(k=2\)</span>: <span class="math display">\[\hat{I}_{\rm trapezoidal}(f) = \frac{b-a}{2} \{ f(a)+f(b) \}. \]</span> <em>Simpson’s rule</em> corresponds to a closed scheme with <span class="math inline">\(k=3\)</span>. We obtain: <span class="math display">\[\hat{I}_{\rm Simpson}(f) = \frac{b-a}{6} \left \{ f(a) + 4 f \left ( \frac{a+b}{2} \right) + f(b) \right \}. \]</span></p>
+<p>It is possible to obtain a crude bound on the error of these schemes. We find that often the <em>midpoint</em> rule can perform better than the <em>trapezoid rule</em> even though it requires less points.</p>
+</div>
+<div id="composite-rules" class="section level3">
+<h3>Composite rules</h3>
+<p>When a composite polynomial interpolation is used the approximation is simply the sum of the integrals on each subinterval. Hence a composite Newton-Cotes rule is obtained by splitting <span class="math inline">\([a,b]\)</span> into <span class="math inline">\(m\)</span> subintervals and summing the approximate intervals for each subinterval. <span class="math display">\[\hat{I}^m_{\rm rule}(f) = \sum_{i=1}^m \hat{I}_{\rm rule}(f_i), \]</span> where <span class="math inline">\(f_{i}\)</span> is <span class="math inline">\(f\)</span> on <span class="math inline">\([a + (i-1)h,a+ih]\)</span> and <span class="math inline">\(h = \frac{b-a}{m}\)</span>.</p>
+</div>
+<div id="gaussian-quadrature" class="section level3">
+<h3>Gaussian quadrature</h3>
+<p>Guassian quadrature is similar to Chebyshev points in that it exploits the freedom of interpolation points ot reduce the error of the approximate integral in the form: <span class="math display">\[ I = \int_{a}^{n}f(x)w(x)dx \]</span> where <span class="math inline">\(w\)</span> is continuous and positive on <span class="math inline">\((a,b)\)</span> and <span class="math inline">\(\forall n \in \mathbb{N},\int_{a}^{b}x^{n}w(x)dx\)</span> is finite. Defining the function space: <span class="math display">\[L_{w}^{2}([a,b]) := \Big{ \{ } f:\int_{a}^{b} f(x)^{2}w(x)dx &lt; \infty \Big{ \} } \]</span> There exists a unique sequencce of orthogonal polynomials <span class="math inline">\(p_{0},p_{1},...\)</span> in <span class="math inline">\(L_{w}^{2}([a,b])\)</span> that are monic. These can be found using the <strong>Gram-Schmidt process</strong>. We choose the interpolation points as the <span class="math inline">\(k\)</span> roots of <span class="math inline">\(p_{k}\)</span> for the Gaussian quadrature rule.</p>
+</div>
+<div id="practical-algorithms" class="section level3">
+<h3>Practical algorithms</h3>
+<p>The methods above can be enhanced by various adaptations and practical error estimation. They are designed to estimate bounds on the error and spend more computational effort in subintervals where the integral is estimated poorly. Defining a robust algorithm involves specifying change of variables for dealing with semi-infinite and infinite intervals. The weight function can also be varied to produce a better approximation.</p>
+</div>
+<div id="multiple-integrals" class="section level3">
+<h3>Multiple integrals</h3>
+<p>Consider an integral over <span class="math inline">\(D = [a_{1}, b_{1}] \times ... \times [a_{d}, b_{d}]\)</span>: <span class="math display">\[I(f) = \int_{D} f(x_{1},...,x_{d})d(x_{1},...,x_{d}).\]</span> According to Fubini’s Theorem, and letting <span class="math inline">\(D&#39; = [a_{2}, b_{2}] \times ... \times [a_{d}, b_{d}]\)</span> can often rewrite <span class="math inline">\(I(f)\)</span> as an iterated integral: <span class="math display">\[I(f) = \int_{a_{1}}^{b_{1} \int_{D&#39;} f(x_{1},...,x_{d})d(x_{2},...,x_{d})dx_{1} = \int_{a_{1}}^{b_{1}g(x_{1})dx_{1} \]</span> We develop a recursive algorithm using an approximation of <span class="math inline">\(g\)</span> to approximate <span class="math inline">\(I(f)\)</span>.</p>
+<p><span class="math display">\[\hat{I}(f) = \sum_{i=1}^k \hat{g}(x_1^{(i)}) \int_{a_1}^{b_1} \ell_i(x_1) {\rm d}x_1, \]</span></p>
+<p>where $(x_{1}) = (h_{x_{1}}).</p>
+</div>
+</div>
+<div id="monte-carlo-integration" class="section level2">
+<h2>Monte Carlo integration</h2>
+<p>Quadrature rules quickly become prohibitively expensive in high dimensional problems, we consider Monte Carlo algorithms for higher dimensions.</p>
+<p>Letting <span class="math inline">\((X, \mathcal{X})\)</span> be a measurable space. We have target probability measure <span class="math inline">\(\pi: \mathcal{X} \rightarrow [0,1]\)</span> and want to approximate: <span class="math display">\[ \pi(f) := \int_{X}f(x)\pi(dx), \]</span></p>
+<p>where <span class="math inline">\(f \in L_{1}(X, \pi) = \{f:\pi(|f|) &lt; \infty \}\)</span>. This is equivalent to <span class="math inline">\(\pi(f)\)</span> is the expectation of <span class="math inline">\(f(X)\)</span> when <span class="math inline">\(X \sim \pi\)</span>.</p>
+<div id="fundamental-results" class="section level3">
+<h3>Fundamental results:</h3>
+<p>Let <span class="math inline">\((X_{n})_{n \meq 1}\)</span> be a sequence of i.i.d. random variables distributed according to <span class="math inline">\(\mu\)</span>. Define: <span class="math display">\[S_{n}(f) := \sum_{i=1}^{n}f(X_{i}),\]</span> for <span class="math inline">\(f \in L_{1}(X, \mu).\)</span> Then: <span class="math display">\[\lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \mu(f), \]</span></p>
+<p>We call this a Monte Carlo approximation of <span class="math inline">\(\mu(f)\)</span>. This is an unbiased estimator. The variance of this estimate is <span class="math inline">\(\frac{\mu(f^{2}) - \mu(f)^{2}}{n}\)</span>.</p>
+<p>Central limit theroem: If <span class="math inline">\(f \in L_{2}(X, \mu)\)</span> then: <span class="math display">\[n^{1/2}\{n^{-1}S_{n}(f) - \mu(f) \} \rightarrow X \sim N(0, \mu(\bar{f}^{2})) ,\]</span> where <span class="math inline">\(\bar{f}\)</span> = f - (f).</p>
+</div>
+<div id="error-compared-to-quadrature" class="section level3">
+<h3>Error compared to quadrature</h3>
+<p>This i sa slow convergence rate compared to quadrature rules in one dimension. Dimension does not directly affect convergence however <span class="math inline">\(\bar{f}\)</span> can be very large for large <span class="math inline">\(d\)</span>.</p>
+</div>
+<div id="sampling" class="section level3">
+<h3>Sampling</h3>
+<p>There are several sampling methods available. If we can simulate random variates <span class="math inline">\(\pi\)</span> on a computer then this is called perfect sampling.</p>
+<p>Another more applicable is rejection sampling. This applies when one can sample <span class="math inline">\(\mu\)</span>-distributed random variates from proposal distribution <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\pi/\mu\)</span> satisfies <span class="math inline">\(\sup_{x\in X}\pi(x)/\mu(x) \leq M &lt; \infty\)</span>. The algorithm is: * Sample <span class="math inline">\(X \sim \mu\)</span></p>
+<ul>
+<li>With probability <span class="math inline">\(\frac{1}{M}\frac{\pi(X)}{\mu(X)}\)</span> output X, otherwise go to step 1</li>
+</ul>
+<p>Rejection sampling works best when the proposal distribution is close to the true distribution but it is not required. In many practical applications <span class="math inline">\(M\)</span> is prohibitively large.</p>
+<p>We can also do importance sampling and self-normalized importance sampling.</p>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
