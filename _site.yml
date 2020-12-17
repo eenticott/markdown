@@ -1,11 +1,11 @@
 name: "markdown"
 output_dir: "docs"
 navbar:
-  title: "RMARKDOWN"
+  title: "Portfolio 2"
   left:
-  - text: "Index"
-    href: index.html
   - text: "Profiling and Debugging"
     href: debugging.html
+  - text: "Matrices"
+    href: matrices.html    
 output:
   html_document:
