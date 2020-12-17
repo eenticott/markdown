@@ -3,7 +3,10 @@ title: "Index"
 output: html_document
 ---
 
-Welcome to my second portfolio submission. It contains the following pages:
+Welcome to my second portfolio submission. The pages can be accessed directly here or through the bar at the top.
 
-- [debugging](.\docs\debugging.html) First entry
-- [matrices](.\docs\matrices.html) Second entry
+- [Profiling and Debugging](.\debugging.html)
+- [Matrices](.\matrices.html) 
+- [Optimisation](.\optimisation.html) 
+- [Integration](.\Integration.html) 
+

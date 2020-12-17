@@ -30,7 +30,7 @@ In `R` a floating point number is stored as a `double` precision number. Accordi
 
 * significant precision ($m$): 52 bits
 
-The decimal equivalent is $(-1)^s \times 2^{e - 1023} \times 1.m$. We expect an error of order $10^-16$ in numerical representations of double numbers. A simple example is:
+The decimal equivalent is $(-1)^s \times 2^{e - 1023} \times 1.m$. We expect an error of order $10^{-16}$ in numerical representations of double numbers. A simple example to demonstrate this is:
 
 ```{r numtest}
 0.1 + 0.2 - 0.3
