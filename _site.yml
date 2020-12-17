@@ -6,6 +6,8 @@ navbar:
   - text: "Profiling and Debugging"
     href: debugging.html
   - text: "Matrices"
-    href: matrices.html    
+    href: matrices.html
+  - text: "Optimisation"
+    href: optimisation.html    
 output:
   html_document:
