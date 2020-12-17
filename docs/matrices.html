@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Euan Enticott" />
+
+
+<title>Matrices</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Portfolio 2</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="debugging.html">Profiling and Debugging</a>
+</li>
+<li>
+  <a href="matrices.html">Matrices</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Matrices</h1>
+<h4 class="author">Euan Enticott</h4>
+<h4 class="date">15/12/2020</h4>
+
+</div>
+
+
+<div id="dense-matrices" class="section level2">
+<h2>Dense Matrices</h2>
+<p>A matrix is a structure in <code>R</code> with two dimensions. Rows and columns can have names which can be changed without changing the values of the matrx.</p>
+<p>Obtaining the row of a matrix gives the result as a matrix, adding <code>drop = F</code> avoids this.</p>
+<p>R also has higher-dimensional structures called arrays.</p>
+<div id="solving-linear-systems" class="section level3">
+<h3>Solving linear systems</h3>
+<p>To solve <span class="math inline">\(Ax = b\)</span> we can write it in two ways. One is to invert <span class="math inline">\(A\)</span> first and multiply by <span class="math inline">\(b\)</span> (<code>solve(A) %*% b</code>). The other is to use <code>solve</code> directly to solve for <span class="math inline">\(x\)</span>. Finding the inverse first results in less accuracy and is slower so it should not be done unless the same system needs to be solved for many different vectors.</p>
+</div>
+<div id="numerical-stability" class="section level3">
+<h3>Numerical stability</h3>
+<p>In <code>R</code> a floating point number is stored as a <code>double</code> precision number. According to <code>IEEE754</code> standard a double number has 64 binary bits with:</p>
+<ul>
+<li><p>sign bit (<span class="math inline">\(s\)</span>): 1 bit</p></li>
+<li><p>exponent (<span class="math inline">\(e\)</span>): 11 bits</p></li>
+<li><p>significant precision (<span class="math inline">\(m\)</span>): 52 bits</p></li>
+</ul>
+<p>The decimal equivalent is <span class="math inline">\((-1)^s \times 2^{e - 1023} \times 1.m\)</span>. We expect an error of order <span class="math inline">\(10^-16\)</span> in numerical representations of double numbers. A simple example is:</p>
+<pre class="r"><code>0.1 + 0.2 - 0.3</code></pre>
+<pre><code>## [1] 5.551115e-17</code></pre>
+<p>To account for numerical innaccuracy can use <code>all.equal</code> instead. These errors compound within matrix multiplication so can often have larger errors. <code>Solve(A,b)</code> incurs less numerical error than <code>solve(A)</code>. Eigenvalues can also involve high numerical error, if you know a input is symmetric this should be specified in the input argument.</p>
+</div>
+</div>
+<div id="sparse-matrices" class="section level2">
+<h2>Sparse Matrices</h2>
+<p>Sparse and dense matrices can be accessed with the <code>Matrix</code> package. Dense matrices are stored as <code>dgeMatrix</code>. It adds the <code>rankMatrix</code> and <code>rcond</code> functions. A sparse matrix is one where most entries are 0. It is inefficient to store all these 0’s in the memory. Sparse matrices are generally stored as <code>dgCMatrix</code>. d stands for digit, g for general (not triangular or symmetric) and C for column (not row or triplet). A sparse matrix can be converted to dense at the cost of increased memory storage. A <code>dgCMatrix</code> is stored using the compressed sparse column (CSC) format. This stores the length of runs of zeros and non-zero entries.</p>
+<div id="basic-operations" class="section level3">
+<h3>Basic operations</h3>
+<p>Multiplication and division retain the <code>dgCMatrix</code> format but addition or subtraction turn <code>dgC</code> into <code>dge</code>. A sparse matrix multiplied by a dense vector outputs a <code>dge</code> but two sparse matrices can be multiplied together and retain sparsity.</p>
+</div>
+<div id="obtaining-the-dependency-graph-of-r-packages." class="section level3">
+<h3>Obtaining the dependency graph of R packages.</h3>
+<p>We can use the <code>miniCRAN</code> package to build an <code>R</code> package depenedncy graph. This can be represented via an adjacency matrix <code>M</code>. The matrix is square with each row and column relating to a vertex. If there is an edge from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> then <span class="math inline">\(M_{i,j} =1\)</span> else the entry is 0. Thus <span class="math inline">\(M\)</span> is usually sparse.</p>
+</div>
+<div id="solving-large-linear-systems" class="section level3">
+<h3>Solving large linear systems</h3>
+<p>Sparse matrices can be even worse when inverting, the inverse of a sparse matrix is not necessarily sparse, should use <code>solve(A,b)</code> whenever possible.</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
