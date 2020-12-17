@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Euan Enticott" />
+
+
+<title>Profiling and Debugging</title>
+
+<script src="site_libs/jquery-1.12.4/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+<script src="site_libs/htmlwidgets-1.5.2/htmlwidgets.js"></script>
+<script src="site_libs/d3-3.5.6/d3.min.js"></script>
+<link href="site_libs/profvis-0.3.6.9000/profvis.css" rel="stylesheet" />
+<script src="site_libs/profvis-0.3.6.9000/profvis.js"></script>
+<script src="site_libs/profvis-0.3.6.9000/scroll.js"></script>
+<link href="site_libs/highlight-6.2.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlight-6.2.0/highlight.js"></script>
+<script src="site_libs/profvis-binding-0.3.7/profvis.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">RMARKDOWN</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Index</a>
+</li>
+<li>
+  <a href="debugging.html">Profiling and Debugging</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Profiling and Debugging</h1>
+<h4 class="author">Euan Enticott</h4>
+<h4 class="date">14/12/2020</h4>
+
+</div>
+
+
+<div id="debugging" class="section level2">
+<h2>Debugging</h2>
+<p>Bugs are an inherent part of programming, it is important to know how to deal with them.</p>
+<div id="approach" class="section level3">
+<h3>Approach</h3>
+<ul>
+<li><p>Understand the error that is occuring, this may require searching the given error message to work out what has gone wrong.</p></li>
+<li><p>Create a reproducible, minimal working example of the unintended behaviour.</p></li>
+<li><p>Identify where the code is going wrong. Using print statements at various points in your code can help with this.</p></li>
+<li><p>Fix the bug and add tests to ensure the bug is not reintroduced at a later date.</p></li>
+</ul>
+<p>A minimum working example is what you would need to submit with a bug report if there was a problem in someone elses code. If a lot of bugs are emerging in code it can help to tackle the problem in smaller parts.</p>
+</div>
+<div id="example" class="section level3">
+<h3>Example</h3>
+<p>We attempt to build another function that finds prime factors. We have the following:</p>
+<pre class="r"><code>prime_factors2 &lt;- function(n){
+  factors &lt;- c()
+  i &lt;- 2
+  r &lt;- n
+  while(prod(factors) != n){
+    if(r%%i == 0) {
+      factors &lt;- c(factors,i)
+      r &lt;- r/i
+      }
+    i &lt;- i+1
+  }
+  return(factors)
+}</code></pre>
+<p>But when we run it on a simple example <code>prime_factors2(12)</code> it gets stuck in a never ending loop. To test why this happens we add some print statements within the function to examine it’s behaviour. We also add a break when <code>i</code> exceeds the number it is factorising.</p>
+<pre class="r"><code>prime_factors2 &lt;- function(n){
+  factors &lt;- c()
+  i &lt;- 2
+  r &lt;- n
+  while(prod(factors) != n){
+    if(r%%i == 0) {
+      factors &lt;- c(factors,i)
+      r &lt;- r/i
+      print(paste(&quot;factors =&quot;, factors))
+      print(paste(&quot;remainder =&quot;, r))
+      }
+    i &lt;- i+1
+    print(paste(&quot;divisor =&quot;, i))
+    if (i &gt; r) {
+      break
+    }
+  }
+  return(factors)
+}</code></pre>
+<p>We run this again on some simple examples.</p>
+<pre class="r"><code>prime_factors2(21)</code></pre>
+<pre><code>## [1] &quot;divisor = 3&quot;
+## [1] &quot;factors = 3&quot;
+## [1] &quot;remainder = 7&quot;
+## [1] &quot;divisor = 4&quot;
+## [1] &quot;divisor = 5&quot;
+## [1] &quot;divisor = 6&quot;
+## [1] &quot;divisor = 7&quot;
+## [1] &quot;factors = 3&quot; &quot;factors = 7&quot;
+## [1] &quot;remainder = 1&quot;
+## [1] &quot;divisor = 8&quot;</code></pre>
+<pre><code>## [1] 3 7</code></pre>
+<pre class="r"><code>prime_factors2(12)</code></pre>
+<pre><code>## [1] &quot;factors = 2&quot;
+## [1] &quot;remainder = 6&quot;
+## [1] &quot;divisor = 3&quot;
+## [1] &quot;factors = 2&quot; &quot;factors = 3&quot;
+## [1] &quot;remainder = 2&quot;
+## [1] &quot;divisor = 4&quot;</code></pre>
+<pre><code>## [1] 2 3</code></pre>
+<p>So we get the correct result for 21, but not for 12. It looks like the function doesn’t detect repeating primes in the factorisation, we test the hypothesis on another simple example.</p>
+<pre class="r"><code>prime_factors2(8)</code></pre>
+<pre><code>## [1] &quot;factors = 2&quot;
+## [1] &quot;remainder = 4&quot;
+## [1] &quot;divisor = 3&quot;
+## [1] &quot;divisor = 4&quot;
+## [1] &quot;factors = 2&quot; &quot;factors = 4&quot;
+## [1] &quot;remainder = 1&quot;
+## [1] &quot;divisor = 5&quot;</code></pre>
+<pre><code>## [1] 2 4</code></pre>
+<p>So again it didn’t find the correct divisors and in fact returned 4 as a prime factor. The divisor is exceeding the remainder before it has finished dividing. To fix this we try resetting the divisor after every successful factorisation as this will allow it to find repeated prime factors.</p>
+<pre class="r"><code>prime_factors2 &lt;- function(n){
+  factors &lt;- c()
+  i &lt;- 2
+  r &lt;- n
+  while(prod(factors) != n){
+    if(r%%i == 0) {
+      factors &lt;- c(factors,i)
+      r &lt;- r/i
+      i &lt;- 1
+      }
+    i &lt;- i+1
+  }
+  return(factors)
+}</code></pre>
+<p>and retry on the earlier failed examples:</p>
+<pre class="r"><code>prime_factors2(8)</code></pre>
+<pre><code>## [1] 2 2 2</code></pre>
+<pre class="r"><code>prime_factors2(12)</code></pre>
+<pre><code>## [1] 2 2 3</code></pre>
+<p>It now works correctly!</p>
+</div>
+</div>
+<div id="profiling" class="section level2">
+<h2>Profiling</h2>
+<p>Profiling in R can be done through the <code>profvis</code> package which builds upon R’s <code>Rprof</code> functionality.</p>
+<pre class="r"><code>library(profvis)</code></pre>
+<p>This is a statistical profiler. It operates by using operating system interupts to determine what code is being executed. This allows a picture to built of where the computation is spending most of its time.</p>
+<p>Statistical profilers are similiar to instrumenting profilers whihc increment counters whenever functions are called however these often require more overhead than the statistical profilers at the benefit of more accuracy.</p>
+<p>These tools are useful for understanding performance and checking the robustness of code.</p>
+<div id="example-1" class="section level3">
+<h3>Example</h3>
+<pre class="r"><code>source(&quot;prime_factors1.R&quot;, keep.source = TRUE)
+profvis(prime_factors(12416515098))</code></pre>
+<div id="htmlwidget-5e874d494e7448be2b73" style="width:100%;height:600px;" class="profvis html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5e874d494e7448be2b73">{"x":{"message":{"prof":{"time":[1,1,1,1,1,1,2,2,2,2,2,2,2,3,3,3,3,3,3,3,4,4,4,4,4,4,4,5,5,5,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,8,8,9,9,9,9,9,9,9,10,10,10,10,10,10,10,11,11,12,12,12,12,12,12,12,13,13,13,13,13,13,13,14,14,15,15,15,15,15,15,15,15,16,16,17,17,18,18,18,18,18,18,18,19,19,19,19,19,19,19,20,20,21,21,21,21,21,21,21,22,22,22,22,22,22,22,23,23,23,23,23,23,23,23],"depth":[6,5,4,3,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,3,2,1,8,7,6,5,4,3,2,1,7,6,5,4,3,2,1,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,2,1,8,7,6,5,4,3,2,1,2,1,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,8,7,6,5,4,3,2,1],"label":["while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","%%","rmarkdown::render_site","<GC>","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","<GC>","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","i = i + 1 }\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","i = i + 1 }\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","<GC>","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site"],"filenum":[1,1,1,1,null,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,1,null,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,null,null,1,1,1,1,1,null,null,1,null,1,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,null,1,1,1,1,1,null,null],"linenum":[5,11,11,11,null,null,5,11,11,11,11,null,null,5,11,11,11,11,null,null,5,11,11,11,11,null,null,5,5,null,null,5,11,11,11,11,null,null,5,11,11,11,11,null,null,5,null,5,11,11,11,11,null,null,5,11,11,11,11,null,null,5,null,5,11,11,11,11,null,null,5,11,11,11,11,null,null,5,null,null,5,11,11,11,11,null,null,5,null,5,null,5,11,11,11,11,null,null,6,11,11,11,11,null,null,5,null,5,11,11,11,11,null,null,6,11,11,11,11,null,null,null,5,11,11,11,11,null,null],"memalloc":[13.8749465942383,13.8749465942383,13.8749465942383,13.8749465942383,13.8749465942383,13.8749465942383,14.3727340698242,14.3727340698242,14.3727340698242,14.3727340698242,14.3727340698242,14.3727340698242,14.3727340698242,14.8535003662109,14.8535003662109,14.8535003662109,14.8535003662109,14.8535003662109,14.8535003662109,14.8535003662109,14.0119247436523,14.0119247436523,14.0119247436523,14.0119247436523,14.0119247436523,14.0119247436523,14.0119247436523,14.5133438110352,14.5133438110352,14.5133438110352,14.8793334960938,14.8793334960938,14.8793334960938,14.8793334960938,14.8793334960938,14.8793334960938,14.8793334960938,14.8793334960938,14.1601638793945,14.1601638793945,14.1601638793945,14.1601638793945,14.1601638793945,14.1601638793945,14.1601638793945,14.6685943603516,14.6685943603516,13.8280181884766,13.8280181884766,13.8280181884766,13.8280181884766,13.8280181884766,13.8280181884766,13.8280181884766,14.3305358886719,14.3305358886719,14.3305358886719,14.3305358886719,14.3305358886719,14.3305358886719,14.3305358886719,14.6753311157227,14.6753311157227,13.7350769042969,13.7350769042969,13.7350769042969,13.7350769042969,13.7350769042969,13.7350769042969,13.7350769042969,14.0805816650391,14.0805816650391,14.0805816650391,14.0805816650391,14.0805816650391,14.0805816650391,14.0805816650391,14.5468826293945,14.5468826293945,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523,14.1615447998047,14.1615447998047,14.6526489257812,14.6526489257812,13.80615234375,13.80615234375,13.80615234375,13.80615234375,13.80615234375,13.80615234375,13.80615234375,14.3032302856445,14.3032302856445,14.3032302856445,14.3032302856445,14.3032302856445,14.3032302856445,14.3032302856445,14.7893142700195,14.7893142700195,13.9530563354492,13.9530563354492,13.9530563354492,13.9530563354492,13.9530563354492,13.9530563354492,13.9530563354492,14.4462890625,14.4462890625,14.4462890625,14.4462890625,14.4462890625,14.4462890625,14.4462890625,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523,14.8791122436523],"meminc":[0,0,0,0,0,0,0.497787475585938,0,0,0,0,0,0,0.480766296386719,0,0,0,0,0,0,-0.841575622558594,0,0,0,0,0,0,0.501419067382812,0,0,0.365989685058594,0,0,0,0,0,0,0,-0.719169616699219,0,0,0,0,0,0,0.508430480957031,0,-0.840576171875,0,0,0,0,0,0,0.502517700195312,0,0,0,0,0,0,0.344795227050781,0,-0.940254211425781,0,0,0,0,0,0,0.345504760742188,0,0,0,0,0,0,0.466300964355469,0,0.332229614257812,0,0,0,0,0,0,0,-0.717567443847656,0,0.491104125976562,0,-0.84649658203125,0,0,0,0,0,0,0.497077941894531,0,0,0,0,0,0,0.486083984375,0,-0.836257934570312,0,0,0,0,0,0,0.493232727050781,0,0,0,0,0,0,0.432823181152344,0,0,0,0,0,0,0],"filename":["prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,"prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null]},"interval":10,"files":[{"filename":"prime_factors1.R","content":"prime_factors <- function(x) {\r\n  factors = c()\r\n  i = 2\r\n  # Find the smallest factor of x\r\n  while ((x %% i) != 0) {\r\n    i = i + 1 }\r\n  # Check if factor is a prime\r\n  if (i == x) {\r\n    return(x) }\r\n  else {\r\n    factors = append(factors, c(prime_factors(i), prime_factors(x/i)))\r\n    return(factors)\r\n  }\r\n}","normpath":"C:/Users/euane/Documents/R Projects/markdown/prime_factors1.R"}],"prof_output":"C:/Users/euane/Documents/R Projects/markdown/.Rproj.user/C012E727/profiles-cache\\file5a4015c7290a.Rprof","highlight":{"output":["^output\\$"],"gc":["^<GC>$"],"stacktrace":["^\\.\\.stacktraceo(n|ff)\\.\\.$"]},"split":"h"}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>source(&quot;prime_factors2.R&quot;, keep.source = TRUE)
+profvis(prime_factors2(12416515098))</code></pre>
+<div id="htmlwidget-0a31f43b4e6a061e7f47" style="width:100%;height:600px;" class="profvis html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0a31f43b4e6a061e7f47">{"x":{"message":{"prof":{"time":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,3,3,3,4,4,5,5,6,6,6,7,7,8,8,8,8,9,9,9,10,10,10,11,11,11,12,12,12,13,13,14,14,15,15,15,16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,23,24,24,24,25,25,25,26,26,26,27,27,28,28,29,29,30,30,31,31,32,32,32,33,33,33,34,34,34,35,35,36,36,36,37,37,37,38,38,38,39,39,39,39,40,40,41,41,42,42,43,43,43,44,44,44,45,45,45,46,46,46,46,47,47,48,48,48,49,49,49,50,50,50,51,51,52,52,52,53,53,53],"depth":[18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,3,2,1,3,2,1,2,1,2,1,3,2,1,2,1,4,3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,2,1,2,1,3,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,3,2,1,3,2,1,3,2,1,3,2,1,2,1,2,1,2,1,2,1,2,1,3,2,1,3,2,1,3,2,1,2,1,3,2,1,3,2,1,3,2,1,4,3,2,1,2,1,2,1,2,1,3,2,1,3,2,1,3,2,1,4,3,2,1,2,1,3,2,1,3,2,1,3,2,1,2,1,3,2,1,3,2,1],"label":["cmp","h","tryInline","cmpCall","cmp","cmpWhileBody","h","tryInline","cmpCall","cmp","h","tryInline","cmpCall","cmp","genCode","cmpfun","compiler:::tryCmpfun","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","i <- i+1\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","<GC>","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","i <- i+1\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","%%","rmarkdown::render_site","%%","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","i <- i+1\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","%%","rmarkdown::render_site","prod","rmarkdown::render_site","%%","rmarkdown::render_site","<GC>","prod","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","<GC>","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","<GC>","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","%%","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","<GC>","prod","rmarkdown::render_site"],"filenum":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,null,1,null,null,1,null,1,null,1,null,null,1,null,null,1,null,null,1,null,null,1,null,null,1,null,null,1,null,null,1,null,1,null,1,null,null,1,null,1,null,1,null,1,null,1,null,1,null,1,null,1,null,null,1,null,null,1,null,null,1,null,null,1,null,1,null,1,null,1,null,1,null,null,1,null,1,null,null,1,null,null,1,null,1,null,null,1,null,null,1,null,null,null,1,null,null,1,null,1,null,1,null,1,null,null,1,null,null,1,null,null,null,1,null,null,1,null,1,null,null,1,null,null,1,null,null,1,null,1,null,null,null,1,null],"linenum":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,6,null,null,5,null,null,5,null,5,null,10,null,null,5,null,null,6,null,null,6,null,null,5,null,null,10,null,null,5,null,null,5,null,5,null,6,null,null,5,null,5,null,6,null,6,null,5,null,5,null,5,null,6,null,null,10,null,null,6,null,null,5,null,null,5,null,5,null,6,null,5,null,6,null,null,5,null,6,null,null,6,null,null,5,null,5,null,null,6,null,null,5,null,null,null,6,null,null,5,null,5,null,5,null,6,null,null,5,null,null,6,null,null,null,6,null,null,6,null,6,null,null,5,null,null,5,null,null,5,null,6,null,null,null,5,null],"memalloc":[14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,14.5842514038086,15.1626510620117,15.1626510620117,15.1626510620117,15.7098236083984,15.7098236083984,15.7098236083984,16.1782684326172,16.1782684326172,14.6615600585938,14.6615600585938,15.2616653442383,15.2616653442383,15.2616653442383,15.8417892456055,15.8417892456055,16.3084487915039,16.3084487915039,16.3084487915039,16.3084487915039,14.9829635620117,14.9829635620117,14.9829635620117,15.571044921875,15.571044921875,15.571044921875,16.1903076171875,16.1903076171875,16.1903076171875,14.7360000610352,14.7360000610352,14.7360000610352,15.3373413085938,15.3373413085938,15.9276962280273,15.9276962280273,14.470573425293,14.470573425293,14.470573425293,15.0802001953125,15.0802001953125,15.6590881347656,15.6590881347656,16.2760391235352,16.2760391235352,14.7898254394531,14.7898254394531,15.3856048583984,15.3856048583984,15.9675140380859,15.9675140380859,14.5016403198242,14.5016403198242,15.1021575927734,15.1021575927734,15.1021575927734,15.6690292358398,15.6690292358398,15.6690292358398,16.2797241210938,16.2797241210938,16.2797241210938,14.8145370483398,14.8145370483398,14.8145370483398,15.4050064086914,15.4050064086914,15.999137878418,15.999137878418,14.5388946533203,14.5388946533203,15.1510162353516,15.1510162353516,15.738395690918,15.738395690918,16.3084487915039,16.3084487915039,16.3084487915039,14.9279937744141,14.9279937744141,14.9279937744141,15.5200424194336,15.5200424194336,15.5200424194336,15.930908203125,15.930908203125,14.4805297851562,14.4805297851562,14.4805297851562,15.1028518676758,15.1028518676758,15.1028518676758,15.6966018676758,15.6966018676758,15.6966018676758,16.3084487915039,16.3084487915039,16.3084487915039,16.3084487915039,14.8701477050781,14.8701477050781,15.4546279907227,15.4546279907227,16.0614547729492,16.0614547729492,14.5561218261719,14.5561218261719,14.5561218261719,15.1662521362305,15.1662521362305,15.1662521362305,15.7532348632812,15.7532348632812,15.7532348632812,16.3084564208984,16.3084564208984,16.3084564208984,16.3084564208984,14.9083404541016,14.9083404541016,15.5033645629883,15.5033645629883,15.5033645629883,16.1274566650391,16.1274566650391,16.1274566650391,14.6714172363281,14.6714172363281,14.6714172363281,15.278434753418,15.278434753418,15.8800964355469,15.8800964355469,15.8800964355469,16.3084487915039,16.3084487915039,16.3084487915039],"meminc":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.578399658203125,0,0,0.547172546386719,0,0,0.46844482421875,0,-1.51670837402344,0,0.600105285644531,0,0,0.580123901367188,0,0.466659545898438,0,0,0,-1.32548522949219,0,0,0.588081359863281,0,0,0.6192626953125,0,0,-1.45430755615234,0,0,0.601341247558594,0,0.590354919433594,0,-1.45712280273438,0,0,0.609626770019531,0,0.578887939453125,0,0.616950988769531,0,-1.48621368408203,0,0.595779418945312,0,0.5819091796875,0,-1.46587371826172,0,0.600517272949219,0,0,0.566871643066406,0,0,0.610694885253906,0,0,-1.46518707275391,0,0,0.590469360351562,0,0.594131469726562,0,-1.46024322509766,0,0.61212158203125,0,0.587379455566406,0,0.570053100585938,0,0,-1.38045501708984,0,0,0.592048645019531,0,0,0.410865783691406,0,-1.45037841796875,0,0,0.622322082519531,0,0,0.59375,0,0,0.611846923828125,0,0,0,-1.43830108642578,0,0.584480285644531,0,0.606826782226562,0,-1.50533294677734,0,0,0.610130310058594,0,0,0.586982727050781,0,0,0.555221557617188,0,0,0,-1.40011596679688,0,0.595024108886719,0,0,0.624092102050781,0,0,-1.45603942871094,0,0,0.607017517089844,0,0.601661682128906,0,0,0.428352355957031,0,0],"filename":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,null,null,"prime_factors2.R",null]},"interval":10,"files":[{"filename":"prime_factors2.R","content":"prime_factors2 <- function(n){\r\n  factors <- c()\r\n  i <- 2\r\n  r <- n\r\n  while(prod(factors) != n){\r\n    if(r%%i == 0) {\r\n      factors <- c(factors,i)\r\n      r <- r/i\r\n    }\r\n    i <- i+1\r\n  }\r\n  return(factors)\r\n}","normpath":"C:/Users/euane/Documents/R Projects/markdown/prime_factors2.R"}],"prof_output":"C:/Users/euane/Documents/R Projects/markdown/.Rproj.user/C012E727/profiles-cache\\file5a406f994286.Rprof","highlight":{"output":["^output\\$"],"gc":["^<GC>$"],"stacktrace":["^\\.\\.stacktraceo(n|ff)\\.\\.$"]},"split":"h"}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div id="performance" class="section level2">
+<h2>Performance</h2>
+<p>R code is often not optimal in terms of performance, writing in C would run faster. For many core operations R delegates the task to routines written in C.</p>
+<div id="memory-management" class="section level3">
+<h3>Memory management</h3>
+<p>A main feature of R is its pass-by-value semantics. This makes the language easy to use but more difficult to write code that performs well. There are hidden optimizations in R that improve performance. When you update elements of an array in a for loop, multiple copies of the array are not made. This would make time complexity <span class="math inline">\(O(n^2)\)</span>. Though small changes that would not affect pass-by-reference can cause multiple copies of an array to be made. This can happen when updating a vector with a function.</p>
+</div>
+<div id="column-major-storage" class="section level3">
+<h3>Column-major storage</h3>
+<p>When a matrix is stored in memory it is typically mapped to a contiguous block of memory. This is done by coloum-major or row-major storage. R uses column-major order, which means that elements in each column are stored in contiguous blocks. This has an implication on performance. For example a matrix filled by row will take longer than a matrix stored by column. This is because reading and writing memory in contiguous blocks is faster than reading memory in seperate locations.</p>
+</div>
+<div id="example-2" class="section level3">
+<h3>Example</h3>
+</div>
+<div id="code-in-another-languague" class="section level3">
+<h3>Code in another languague</h3>
+<p>It is possible to call cdoe that is written in another language (for example C) from <code>R</code> using the <code>Rcpp</code> function. This is an important way to imrpove performance.</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

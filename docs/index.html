@@ -11,9 +11,9 @@
 
 
 
-<title>Profiling and Debugging2</title>
+<title>Index</title>
 
-<script src="site_libs/jquery-1.12.4/jquery.min.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -24,14 +24,6 @@
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
 <script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
-<script src="site_libs/htmlwidgets-1.5.2/htmlwidgets.js"></script>
-<script src="site_libs/d3-3.5.6/d3.min.js"></script>
-<link href="site_libs/profvis-0.3.6.9000/profvis.css" rel="stylesheet" />
-<script src="site_libs/profvis-0.3.6.9000/profvis.js"></script>
-<script src="site_libs/profvis-0.3.6.9000/scroll.js"></script>
-<link href="site_libs/highlight-6.2.0/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlight-6.2.0/highlight.js"></script>
-<script src="site_libs/profvis-binding-0.3.7/profvis.js"></script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -308,153 +300,12 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Profiling and Debugging2</h1>
+<h1 class="title toc-ignore">Index</h1>
 
 </div>
 
 
-<div id="debugging" class="section level2">
-<h2>Debugging</h2>
-<p>Bugs are an inherent part of programming, it is important to know how to deal with them.</p>
-<div id="approach" class="section level3">
-<h3>Approach</h3>
-<ul>
-<li><p>Understand the error that is occuring, this may require searching the given error message to work out what has gone wrong.</p></li>
-<li><p>Create a reproducible, minimal working example of the unintended behaviour.</p></li>
-<li><p>Identify where the code is going wrong. Using print statements at various points in your code can help with this.</p></li>
-<li><p>Fix the bug and add tests to ensure the bug is not reintroduced at a later date.</p></li>
-</ul>
-<p>A minimum working example is what you would need to submit with a bug report if there was a problem in someone elses code. If a lot of bugs are emerging in code it can help to tackle the problem in smaller parts.</p>
-</div>
-<div id="example" class="section level3">
-<h3>Example</h3>
-<p>We attempt to build another function that finds prime factors. We have the following:</p>
-<pre class="r"><code>prime_factors2 &lt;- function(n){
-  factors &lt;- c()
-  i &lt;- 2
-  r &lt;- n
-  while(prod(factors) != n){
-    if(r%%i == 0) {
-      factors &lt;- c(factors,i)
-      r &lt;- r/i
-      }
-    i &lt;- i+1
-  }
-  return(factors)
-}</code></pre>
-<p>But when we run it on a simple example <code>prime_factors2(12)</code> it gets stuck in a never ending loop. To test why this happens we add some print statements within the function to examine it’s behaviour. We also add a break when <code>i</code> exceeds the number it is factorising.</p>
-<pre class="r"><code>prime_factors2 &lt;- function(n){
-  factors &lt;- c()
-  i &lt;- 2
-  r &lt;- n
-  while(prod(factors) != n){
-    if(r%%i == 0) {
-      factors &lt;- c(factors,i)
-      r &lt;- r/i
-      print(paste(&quot;factors =&quot;, factors))
-      print(paste(&quot;remainder =&quot;, r))
-      }
-    i &lt;- i+1
-    print(paste(&quot;divisor =&quot;, i))
-    if (i &gt; r) {
-      break
-    }
-  }
-  return(factors)
-}</code></pre>
-<p>We run this again on some simple examples.</p>
-<pre class="r"><code>prime_factors2(21)</code></pre>
-<pre><code>## [1] &quot;divisor = 3&quot;
-## [1] &quot;factors = 3&quot;
-## [1] &quot;remainder = 7&quot;
-## [1] &quot;divisor = 4&quot;
-## [1] &quot;divisor = 5&quot;
-## [1] &quot;divisor = 6&quot;
-## [1] &quot;divisor = 7&quot;
-## [1] &quot;factors = 3&quot; &quot;factors = 7&quot;
-## [1] &quot;remainder = 1&quot;
-## [1] &quot;divisor = 8&quot;</code></pre>
-<pre><code>## [1] 3 7</code></pre>
-<pre class="r"><code>prime_factors2(12)</code></pre>
-<pre><code>## [1] &quot;factors = 2&quot;
-## [1] &quot;remainder = 6&quot;
-## [1] &quot;divisor = 3&quot;
-## [1] &quot;factors = 2&quot; &quot;factors = 3&quot;
-## [1] &quot;remainder = 2&quot;
-## [1] &quot;divisor = 4&quot;</code></pre>
-<pre><code>## [1] 2 3</code></pre>
-<p>So we get the correct result for 21, but not for 12. It looks like the function doesn’t detect repeating primes in the factorisation, we test the hypothesis on another simple example.</p>
-<pre class="r"><code>prime_factors2(8)</code></pre>
-<pre><code>## [1] &quot;factors = 2&quot;
-## [1] &quot;remainder = 4&quot;
-## [1] &quot;divisor = 3&quot;
-## [1] &quot;divisor = 4&quot;
-## [1] &quot;factors = 2&quot; &quot;factors = 4&quot;
-## [1] &quot;remainder = 1&quot;
-## [1] &quot;divisor = 5&quot;</code></pre>
-<pre><code>## [1] 2 4</code></pre>
-<p>So again it didn’t find the correct divisors and in fact returned 4 as a prime factor. The divisor is exceeding the remainder before it has finished dividing. To fix this we try resetting the divisor after every successful factorisation as this will allow it to find repeated prime factors.</p>
-<pre class="r"><code>prime_factors2 &lt;- function(n){
-  factors &lt;- c()
-  i &lt;- 2
-  r &lt;- n
-  while(prod(factors) != n){
-    if(r%%i == 0) {
-      factors &lt;- c(factors,i)
-      r &lt;- r/i
-      i &lt;- 1
-      }
-    i &lt;- i+1
-  }
-  return(factors)
-}</code></pre>
-<p>and retry on the earlier failed examples:</p>
-<pre class="r"><code>prime_factors2(8)</code></pre>
-<pre><code>## [1] 2 2 2</code></pre>
-<pre class="r"><code>prime_factors2(12)</code></pre>
-<pre><code>## [1] 2 2 3</code></pre>
-<p>It now works correctly!</p>
-</div>
-</div>
-<div id="profiling" class="section level2">
-<h2>Profiling</h2>
-<p>Profiling in R can be done through the <code>profvis</code> package which builds upon R’s <code>Rprof</code> functionality.</p>
-<pre class="r"><code>library(profvis)</code></pre>
-<p>This is a statistical profiler. It operates by using operating system interupts to determine what code is being executed. This allows a picture to built of where the computation is spending most of its time.</p>
-<p>Statistical profilers are similiar to instrumenting profilers whihc increment counters whenever functions are called however these often require more overhead than the statistical profilers at the benefit of more accuracy.</p>
-<p>These tools are useful for understanding performance and checking the robustness of code.</p>
-<div id="example-1" class="section level3">
-<h3>Example</h3>
-<pre class="r"><code>setwd(&#39;..&#39;)
-source(&quot;prime_factors1.R&quot;, keep.source = TRUE)
-profvis(prime_factors(12416515098))</code></pre>
-<div id="htmlwidget-8104fbcd5177eb01f3d0" style="width:100%;height:600px;" class="profvis html-widget"></div>
-<script type="application/json" data-for="htmlwidget-8104fbcd5177eb01f3d0">{"x":{"message":{"prof":{"time":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,3,3,3,3,3,3,3,4,4,5,5,5,5,5,5,5,6,6,6,6,6,6,6,7,7,7,7,7,7,7,8,8,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,11,11,12,12,12,12,12,12,12,13,13,14,14,14,14,14,14,14,15,15,15,15,15,15,15,16,16,17,17,17,17,17,17,17,18,18,18,18,18,18,18,19,19,19,20,20,20,20,20,20,20,21,21,21,21,21,21,21,22,22,23,23,23,23,23,23,23],"depth":[20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,2,1,8,7,6,5,4,3,2,1,7,6,5,4,3,2,1,2,1,7,6,5,4,3,2,1,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,3,2,1,7,6,5,4,3,2,1,7,6,5,4,3,2,1,2,1,7,6,5,4,3,2,1],"label":["getFoldFun","constantFoldCall","constantFold","cmp","h","tryInline","cmpCall","cmp","h","tryInline","cmpCall","cmp","h","tryInline","cmpCall","cmp","genCode","cmpfun","compiler:::tryCmpfun","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","i = i + 1 }\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","i = i + 1 }\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","<GC>","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","i = i + 1 }\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site","%%","rmarkdown::render_site","while ((x %% i) != 0) {\r","prime_factors","prime_factors","prime_factors","prime_factors","prime_factors","rmarkdown::render_site"],"filenum":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,null,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,null,1,1,1,1,1,null,null,1,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,1,null,1,1,1,1,1,null,null,1,1,1,1,1,null,null,1,null,1,1,1,1,1,null,null],"linenum":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,5,11,11,11,11,null,null,5,11,11,11,11,null,null,5,null,5,11,11,11,11,null,null,6,11,11,11,11,null,null,6,11,11,11,11,null,null,5,null,null,5,11,11,11,11,null,null,5,11,11,11,11,null,null,5,null,5,11,11,11,11,null,null,5,null,5,11,11,11,11,null,null,5,11,11,11,11,null,null,5,null,5,11,11,11,11,null,null,6,11,11,11,11,null,null,5,5,null,5,11,11,11,11,null,null,5,11,11,11,11,null,null,5,null,5,11,11,11,11,null,null],"memalloc":[14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,14.5429229736328,15.0230407714844,15.0230407714844,15.0230407714844,15.0230407714844,15.0230407714844,15.0230407714844,15.0230407714844,15.4923477172852,15.4923477172852,15.4923477172852,15.4923477172852,15.4923477172852,15.4923477172852,15.4923477172852,15.9428329467773,15.9428329467773,14.4045104980469,14.4045104980469,14.4045104980469,14.4045104980469,14.4045104980469,14.4045104980469,14.4045104980469,14.8927459716797,14.8927459716797,14.8927459716797,14.8927459716797,14.8927459716797,14.8927459716797,14.8927459716797,15.3694076538086,15.3694076538086,15.3694076538086,15.3694076538086,15.3694076538086,15.3694076538086,15.3694076538086,15.8470993041992,15.8470993041992,16.2032318115234,16.2032318115234,16.2032318115234,16.2032318115234,16.2032318115234,16.2032318115234,16.2032318115234,16.2032318115234,14.7008666992188,14.7008666992188,14.7008666992188,14.7008666992188,14.7008666992188,14.7008666992188,14.7008666992188,15.1766738891602,15.1766738891602,15.6571960449219,15.6571960449219,15.6571960449219,15.6571960449219,15.6571960449219,15.6571960449219,15.6571960449219,16.1341781616211,16.1341781616211,14.6319198608398,14.6319198608398,14.6319198608398,14.6319198608398,14.6319198608398,14.6319198608398,14.6319198608398,15.1069030761719,15.1069030761719,15.1069030761719,15.1069030761719,15.1069030761719,15.1069030761719,15.1069030761719,15.4597320556641,15.4597320556641,15.9157791137695,15.9157791137695,15.9157791137695,15.9157791137695,15.9157791137695,15.9157791137695,15.9157791137695,14.3994903564453,14.3994903564453,14.3994903564453,14.3994903564453,14.3994903564453,14.3994903564453,14.3994903564453,14.8851013183594,14.8851013183594,14.8851013183594,15.2026290893555,15.2026290893555,15.2026290893555,15.2026290893555,15.2026290893555,15.2026290893555,15.2026290893555,15.6473617553711,15.6473617553711,15.6473617553711,15.6473617553711,15.6473617553711,15.6473617553711,15.6473617553711,16.1246948242188,16.1246948242188,14.5055236816406,14.5055236816406,14.5055236816406,14.5055236816406,14.5055236816406,14.5055236816406,14.5055236816406],"meminc":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.480117797851562,0,0,0,0,0,0,0.469306945800781,0,0,0,0,0,0,0.450485229492188,0,-1.53832244873047,0,0,0,0,0,0,0.488235473632812,0,0,0,0,0,0,0.476661682128906,0,0,0,0,0,0,0.477691650390625,0,0.356132507324219,0,0,0,0,0,0,0,-1.50236511230469,0,0,0,0,0,0,0.475807189941406,0,0.480522155761719,0,0,0,0,0,0,0.476982116699219,0,-1.50225830078125,0,0,0,0,0,0,0.474983215332031,0,0,0,0,0,0,0.352828979492188,0,0.456047058105469,0,0,0,0,0,0,-1.51628875732422,0,0,0,0,0,0,0.485610961914062,0,0,0.317527770996094,0,0,0,0,0,0,0.444732666015625,0,0,0,0,0,0,0.477333068847656,0,-1.61917114257812,0,0,0,0,0,0],"filename":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null,"prime_factors1.R",null,"prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R","prime_factors1.R",null,null]},"interval":10,"files":[{"filename":"prime_factors1.R","content":"prime_factors <- function(x) {\r\n  factors = c()\r\n  i = 2\r\n  # Find the smallest factor of x\r\n  while ((x %% i) != 0) {\r\n    i = i + 1 }\r\n  # Check if factor is a prime\r\n  if (i == x) {\r\n    return(x) }\r\n  else {\r\n    factors = append(factors, c(prime_factors(i), prime_factors(x/i)))\r\n    return(factors)\r\n  }\r\n}","normpath":"C:/Users/euane/Documents/R Projects/prime_factors1.R"}],"prof_output":"C:/Users/euane/Documents/R Projects/markdown/.Rproj.user/C012E727/profiles-cache\\file26d849205801.Rprof","highlight":{"output":["^output\\$"],"gc":["^<GC>$"],"stacktrace":["^\\.\\.stacktraceo(n|ff)\\.\\.$"]},"split":"h"}},"evals":[],"jsHooks":[]}</script>
-<pre class="r"><code>source(&quot;prime_factors2.R&quot;, keep.source = TRUE)
-profvis(prime_factors2(12416515098))</code></pre>
-<div id="htmlwidget-29dc54ffb00a1949325c" style="width:100%;height:600px;" class="profvis html-widget"></div>
-<script type="application/json" data-for="htmlwidget-29dc54ffb00a1949325c">{"x":{"message":{"prof":{"time":[1,1,1,1,1,1,2,2,3,3,4,4,4,5,5,5,5,6,6,7,7,7,8,8,8,8,9,9,9,10,10,11,11,12,12,12,13,13,14,14,14,15,15,15,16,16,16,17,17,17,18,18,18,18,19,19,19,20,20,20,21,21,21,21,22,22,22,23,23,24,24,24,25,25,25,26,26,26,27,27,27,28,28,28,29,29,30,30,30,31,31,31,31,32,32,33,33,34,34,34,35,35,35,36,36,36,37,37,38,38,39,39,39,40,40,41,41,41,41,42,42,42,43,43,44,44,44,45,45,46,46,47,47,47,48,48,48,49,49,49,50,50,50,51,51,51,52,52,52,53,53,53,54,54,54,55,55,55,56,56],"depth":[6,5,4,3,2,1,2,1,2,1,3,2,1,4,3,2,1,2,1,3,2,1,4,3,2,1,3,2,1,2,1,2,1,3,2,1,2,1,3,2,1,3,2,1,3,2,1,3,2,1,4,3,2,1,3,2,1,3,2,1,4,3,2,1,3,2,1,2,1,3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,2,1,3,2,1,4,3,2,1,2,1,2,1,3,2,1,3,2,1,3,2,1,2,1,2,1,3,2,1,2,1,4,3,2,1,3,2,1,2,1,3,2,1,2,1,2,1,3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,2,1],"label":["parent.env","frameTypes","makeCenv","cmpfun","compiler:::tryCmpfun","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","<GC>","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","<GC>","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","<GC>","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","<GC>","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","%%","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","i <- i+1\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","<GC>","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","%%","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","prod","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","<GC>","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","prod","rmarkdown::render_site","<GC>","prod","rmarkdown::render_site","%%","rmarkdown::render_site","%%","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prod","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","while(prod(factors) != n){\r","prime_factors2","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","<GC>","prod","rmarkdown::render_site","if(r%%i == 0) {\r","prime_factors2","rmarkdown::render_site","%%","rmarkdown::render_site"],"filenum":[null,null,null,null,null,null,1,null,1,null,1,null,null,null,1,null,null,1,null,1,null,null,null,1,null,null,1,null,null,1,null,1,null,1,null,null,1,null,1,null,null,1,null,null,1,null,null,1,null,null,null,1,null,null,1,null,null,1,null,null,null,1,null,null,1,null,null,1,null,1,null,null,1,null,null,1,null,null,1,null,null,1,null,null,1,null,1,null,null,null,1,null,null,1,null,1,null,1,null,null,1,null,null,1,null,null,1,null,1,null,1,null,null,1,null,null,1,null,null,1,null,null,1,null,null,1,null,1,null,1,null,1,null,null,1,null,null,1,1,null,1,null,null,1,null,null,1,null,null,1,null,null,null,1,null,1,null,null,1,null],"linenum":[null,null,null,null,null,null,5,null,5,null,5,null,null,null,6,null,null,5,null,6,null,null,null,5,null,null,6,null,null,5,null,5,null,6,null,null,5,null,6,null,null,5,null,null,6,null,null,5,null,null,null,5,null,null,5,null,null,6,null,null,null,5,null,null,5,null,null,6,null,6,null,null,6,null,null,5,null,null,5,null,null,10,null,null,5,null,5,null,null,null,5,null,null,5,null,6,null,6,null,null,6,null,null,5,null,null,5,null,5,null,5,null,null,5,null,null,5,null,null,5,null,null,5,null,null,5,null,6,null,6,null,6,null,null,5,null,null,5,5,null,5,null,null,6,null,null,5,null,null,6,null,null,null,5,null,6,null,null,6,null],"memalloc":[15.1316680908203,15.1316680908203,15.1316680908203,15.1316680908203,15.1316680908203,15.1316680908203,15.3459930419922,15.3459930419922,15.90576171875,15.90576171875,16.4580764770508,16.4580764770508,16.4580764770508,16.8011703491211,16.8011703491211,16.8011703491211,16.8011703491211,15.7127456665039,15.7127456665039,16.2879486083984,16.2879486083984,16.2879486083984,16.8019485473633,16.8019485473633,16.8019485473633,16.8019485473633,15.5441055297852,15.5441055297852,15.5441055297852,16.1244583129883,16.1244583129883,16.6714172363281,16.6714172363281,15.3599014282227,15.3599014282227,15.3599014282227,15.946891784668,15.946891784668,16.5244064331055,16.5244064331055,16.5244064331055,15.2007827758789,15.2007827758789,15.2007827758789,15.791877746582,15.791877746582,15.791877746582,16.3621978759766,16.3621978759766,16.3621978759766,16.8019485473633,16.8019485473633,16.8019485473633,16.8019485473633,15.6455001831055,15.6455001831055,15.6455001831055,16.2254104614258,16.2254104614258,16.2254104614258,16.8019485473633,16.8019485473633,16.8019485473633,16.8019485473633,15.4997711181641,15.4997711181641,15.4997711181641,16.0849075317383,16.0849075317383,16.6704788208008,16.6704788208008,16.6704788208008,15.3475723266602,15.3475723266602,15.3475723266602,15.9309387207031,15.9309387207031,15.9309387207031,16.4836654663086,16.4836654663086,16.4836654663086,15.1791534423828,15.1791534423828,15.1791534423828,15.771842956543,15.771842956543,16.3590469360352,16.3590469360352,16.3590469360352,16.8019485473633,16.8019485473633,16.8019485473633,16.8019485473633,15.5923767089844,15.5923767089844,16.1754760742188,16.1754760742188,16.7303771972656,16.7303771972656,16.7303771972656,15.422981262207,15.422981262207,15.422981262207,16.0092163085938,16.0092163085938,16.0092163085938,16.5795440673828,16.5795440673828,15.2395553588867,15.2395553588867,15.8142547607422,15.8142547607422,15.8142547607422,16.3909912109375,16.3909912109375,16.8019485473633,16.8019485473633,16.8019485473633,16.8019485473633,15.6667327880859,15.6667327880859,15.6667327880859,16.2581176757812,16.2581176757812,16.8005218505859,16.8005218505859,16.8005218505859,15.5491104125977,15.5491104125977,16.1303787231445,16.1303787231445,16.6990814208984,16.6990814208984,16.6990814208984,15.3745880126953,15.3745880126953,15.3745880126953,15.9595336914062,15.9595336914062,15.9595336914062,16.537467956543,16.537467956543,16.537467956543,15.2385101318359,15.2385101318359,15.2385101318359,15.8038024902344,15.8038024902344,15.8038024902344,16.3956604003906,16.3956604003906,16.3956604003906,16.8005294799805,16.8005294799805,16.8005294799805,15.67529296875,15.67529296875,15.67529296875,16.2615127563477,16.2615127563477],"meminc":[0,0,0,0,0,0,0.214324951171875,0,0.559768676757812,0,0.552314758300781,0,0,0.343093872070312,0,0,0,-1.08842468261719,0,0.575202941894531,0,0,0.513999938964844,0,0,0,-1.25784301757812,0,0,0.580352783203125,0,0.546958923339844,0,-1.31151580810547,0,0,0.586990356445312,0,0.5775146484375,0,0,-1.32362365722656,0,0,0.591094970703125,0,0,0.570320129394531,0,0,0.439750671386719,0,0,0,-1.15644836425781,0,0,0.579910278320312,0,0,0.5765380859375,0,0,0,-1.30217742919922,0,0,0.585136413574219,0,0.5855712890625,0,0,-1.32290649414062,0,0,0.583366394042969,0,0,0.552726745605469,0,0,-1.30451202392578,0,0,0.592689514160156,0,0.587203979492188,0,0,0.442901611328125,0,0,0,-1.20957183837891,0,0.583099365234375,0,0.554901123046875,0,0,-1.30739593505859,0,0,0.586235046386719,0,0,0.570327758789062,0,-1.33998870849609,0,0.574699401855469,0,0,0.576736450195312,0,0.410957336425781,0,0,0,-1.13521575927734,0,0,0.591384887695312,0,0.542404174804688,0,0,-1.25141143798828,0,0.581268310546875,0,0.568702697753906,0,0,-1.32449340820312,0,0,0.584945678710938,0,0,0.577934265136719,0,0,-1.29895782470703,0,0,0.565292358398438,0,0,0.59185791015625,0,0,0.404869079589844,0,0,-1.12523651123047,0,0,0.586219787597656,0],"filename":[null,null,null,null,null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R","prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,"prime_factors2.R",null,null,null,"prime_factors2.R",null,"prime_factors2.R",null,null,"prime_factors2.R",null]},"interval":10,"files":[{"filename":"prime_factors2.R","content":"prime_factors2 <- function(n){\r\n  factors <- c()\r\n  i <- 2\r\n  r <- n\r\n  while(prod(factors) != n){\r\n    if(r%%i == 0) {\r\n      factors <- c(factors,i)\r\n      r <- r/i\r\n    }\r\n    i <- i+1\r\n  }\r\n  return(factors)\r\n}","normpath":"C:/Users/euane/Documents/R Projects/prime_factors2.R"}],"prof_output":"C:/Users/euane/Documents/R Projects/markdown/.Rproj.user/C012E727/profiles-cache\\file26d85f542b9b.Rprof","highlight":{"output":["^output\\$"],"gc":["^<GC>$"],"stacktrace":["^\\.\\.stacktraceo(n|ff)\\.\\.$"]},"split":"h"}},"evals":[],"jsHooks":[]}</script>
-</div>
-</div>
-<div id="performance" class="section level2">
-<h2>Performance</h2>
-<p>R code is often not optimal in terms of performance, writing in C would run faster. For many core operations R delegates the task to routines written in C.</p>
-<div id="memory-management" class="section level3">
-<h3>Memory management</h3>
-<p>A main feature of R is its pass-by-value semantics. This makes the language easy to use but more difficult to write code that performs well. There are hidden optimizations in R that improve performance. When you update elements of an array in a for loop, multiple copies of the array are not made. This would make time complexity <span class="math inline">\(O(n^2)\)</span>. Though small changes that would not affect pass-by-reference can cause multiple copies of an array to be made. This can happen when updating a vector with a function.</p>
-</div>
-<div id="column-major-storage" class="section level3">
-<h3>Column-major storage</h3>
-<p>When a matrix is stored in memory it is typically mapped to a contiguous block of memory. This is done by coloum-major or row-major storage. R uses column-major order, which means that elements in each column are stored in contiguous blocks. This has an implication on performance. For example a matrix filled by row will take longer than a matrix stored by column. This is because reading and writing memory in contiguous blocks is faster than reading memory in seperate locations.</p>
-</div>
-<div id="example-2" class="section level3">
-<h3>Example</h3>
-</div>
-<div id="code-in-another-languague" class="section level3">
-<h3>Code in another languague</h3>
-<p>It is possible to call cdoe that is written in another language (for example C) from <code>R</code> using the <code>Rcpp</code> function. This is an important way to imrpove performance.</p>
-</div>
-</div>
+<p>Hello this is the index page</p>
 
 
 
