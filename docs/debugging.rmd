@@ -125,6 +125,7 @@ These tools are useful for understanding performance and checking the robustness
 
 ### Example
 ```{r prof2}
+setwd('..')
 source("prime_factors1.R", keep.source = TRUE)
 profvis(prime_factors(12416515098))
 source("prime_factors2.R", keep.source = TRUE)
