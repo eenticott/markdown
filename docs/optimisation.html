@@ -666,14 +666,14 @@ SANN</code></pre>
 <p>We now look at the results for each of the methods</p>
 <pre class="r"><code>optim_results</code></pre>
 <pre><code>##                   minimum       times
-## nlm_with_grad 0.003000021 0.003000021
-## nlm_no_grad   0.004001856 0.004001856
-## Nelder-Mead   1.560592049 0.004001141
-## CG            1.560592035 0.004000902
-## BFGS          3.786106059 0.004000902
+## nlm_with_grad 0.003001213 0.003001213
+## nlm_no_grad   0.001999855 0.001999855
+## Nelder-Mead   1.560592049 0.003001213
+## CG            1.560592035 0.004001141
+## BFGS          3.786106059 0.003000975
 ## L-BFGS-B      1.560592035 0.003000975
-## SANN          1.560608650 0.023005962</code></pre>
-<p>We see that for time taken, all the functions perform similarly in this case apart from simulated annealing which takes just over twice as long as the next slowest. Surprisingly BFGS also seems to have encountered some problems as it does not converge to the correct point and ran slightly slower, though the low memory version did converge correctly. Neither of the <code>nlm</code> implementations found the correct minimum although as it is smaller than the expected minimum it seems they have found one outside the area in which we were looking.</p>
+## SANN          1.560608650 0.025005817</code></pre>
+<p>We see that for time taken, all the functions perform similarly in this case apart from simulated annealing which takes just over twice as long as the next slowest. Surprisingly BFGS also seems to have encountered some problems as it does not converge to the correct point and ran slightly slower, though the low memory version did converge correctly. Neither of the <code>nlm</code> implementations found the correct minimum although as it is smaller than the expected minimum it seems they have found one outside the area in which we were looking. As we are only looking at minimising one function here these results are far from conclusive as to the performance of the relative functions.</p>
 </div>
 </div>
 <div id="nonlinear-least-squares-problems" class="section level3">

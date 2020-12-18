@@ -182,7 +182,7 @@ We now look at the results for each of the methods
 optim_results
 ```
 
-We see that for time taken, all the functions perform similarly in this case apart from simulated annealing which takes just over twice as long as the next slowest. Surprisingly BFGS also seems to have encountered some problems as it does not converge to the correct point and ran slightly slower, though the low memory version did converge correctly.  Neither of the `nlm` implementations found the correct minimum although as it is smaller than the expected minimum it seems they have found one outside the area in which we were looking.
+We see that for time taken, all the functions perform similarly in this case apart from simulated annealing which takes just over twice as long as the next slowest. Surprisingly BFGS also seems to have encountered some problems as it does not converge to the correct point and ran slightly slower, though the low memory version did converge correctly.  Neither of the `nlm` implementations found the correct minimum although as it is smaller than the expected minimum it seems they have found one outside the area in which we were looking. As we are only looking at minimising one function here these results are far from conclusive as to the performance of the relative functions.
 
 ### Nonlinear least squares problems
 With dataset $(x_{1}, y_{1}), ...,(x_{m}, y_{m})$ and model $y = f(x,  \beta)$ where $\beta$ are the parameters of the model $f$ we define residuals $r_{i} (\beta) = y_{i} - f(x_{i}, \beta)$. In a nonlinear least squares problem we aim to find $\beta$ such that the sum of squared residuals is minimised. There a subclass of optimisation algorithms designed for nonlinear functions. 
