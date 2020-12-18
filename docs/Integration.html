@@ -574,7 +574,7 @@ ggplot(tib, aes(x=m, colour=rule)) + geom_point(aes(y=log.error), na.rm=TRUE) + 
 <h3>Fundamental results:</h3>
 <p>Let <span class="math inline">\((X_{n})_{n \geq 1}\)</span> be a sequence of i.i.d. random variables distributed according to <span class="math inline">\(\mu\)</span>. Define: <span class="math display">\[S_{n}(f) := \sum_{i=1}^{n}f(X_{i}),\]</span> for <span class="math inline">\(f \in L_{1}(X, \mu).\)</span> Then: <span class="math display">\[\lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \mu(f), \]</span></p>
 <p>We call this a Monte Carlo approximation of <span class="math inline">\(\mu(f)\)</span>. This is an unbiased estimator. The variance of this estimate is <span class="math inline">\(\frac{\mu(f^{2}) - \mu(f)^{2}}{n}\)</span>.</p>
-<p>Central limit theorem: If <span class="math inline">\(f \in L_{2}(X, \mu)\)</span> then: <span class="math display">\[n^{1/2}\{n^{-1}S_{n}(f) - \mu(f) \} \rightarrow X \sim N(0, \mu(\bar{f}^{2})) ,\]</span> where <span class="math inline">\(\bar{f}\)</span> = f - (f).</p>
+<p>Central limit theorem: If <span class="math inline">\(f \in L_{2}(X, \mu)\)</span> then: <span class="math display">\[n^{1/2}\{n^{-1}S_{n}(f) - \mu(f) \} \rightarrow X \sim N(0, \mu(\bar{f}^{2})) ,\]</span> where <span class="math inline">\(\bar{f}\)</span> = <span class="math inline">\(f - \mu(f)\)</span>.</p>
 </div>
 <div id="error-compared-to-quadrature" class="section level3">
 <h3>Error compared to quadrature</h3>

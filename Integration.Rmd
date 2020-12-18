@@ -284,7 +284,7 @@ We call this a Monte Carlo approximation of $\mu(f)$. This is an unbiased estima
 
 Central limit theorem: If $f \in L_{2}(X, \mu)$ then:
 $$n^{1/2}\{n^{-1}S_{n}(f) - \mu(f) \} \rightarrow X \sim N(0, \mu(\bar{f}^{2})) ,$$
-where $\bar{f}$ = f - \mu(f).
+where $\bar{f}$ = $f - \mu(f)$.
 
 ### Error compared to quadrature
 This is a slow convergence rate compared to quadrature rules in one dimension. Dimension does not directly affect convergence however $\bar{f}$ can be very large for large $d$.

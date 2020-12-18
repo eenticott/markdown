@@ -667,12 +667,12 @@ SANN</code></pre>
 <pre class="r"><code>optim_results</code></pre>
 <pre><code>##                   minimum       times
 ## nlm_with_grad 0.003000021 0.003000021
-## nlm_no_grad   0.002000093 0.002000093
-## Nelder-Mead   1.560592049 0.003000975
-## CG            1.560592035 0.002999783
-## BFGS          3.786106059 0.003000975
-## L-BFGS-B      1.560592035 0.002999067
-## SANN          1.560608650 0.021004915</code></pre>
+## nlm_no_grad   0.002001047 0.002001047
+## Nelder-Mead   1.560592049 0.002000093
+## CG            1.560592035 0.003000975
+## BFGS          3.786106059 0.002002001
+## L-BFGS-B      1.560592035 0.002001047
+## SANN          1.560608650 0.021006107</code></pre>
 <p>We see that for time taken, all the functions perform similarly in this case apart from simulated annealing which takes just over twice as long as the next slowest. Surprisingly BFGS also seems to have encountered some problems as it does not converge to the correct point and ran slightly slower, though the low memory version did converge correctly. Neither of the <code>nlm</code> implementations found the correct minimum although as it is smaller than the expected minimum it seems they have found one outside the area in which we were looking. As we are only looking at minimising one function here these results are far from conclusive as to the performance of the relative functions.</p>
 </div>
 </div>
