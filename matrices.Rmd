@@ -9,6 +9,9 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(igraph)
+library(Matrix)
+library(miniCRAN)
 ```
 
 ## Dense Matrices
@@ -20,6 +23,15 @@ R also has higher-dimensional structures called arrays.
 
 ### Solving linear systems
 To solve $Ax = b$ we can write it in two ways. One is to invert $A$ first and multiply by $b$ (`solve(A) %*% b`). The other is to use `solve` directly to solve for $x$. Finding the inverse first results in less accuracy and is slower so it should not be done unless the same system needs to be solved for many different vectors.
+
+```{r }
+A = matrix(c(rnorm(10^2, 3, 0.5)), nrow = 10)
+b = rnorm(10)
+norm(A %*% solve(A, b) - b)
+norm(A %*% solve(A)%*% b - b)
+```
+
+In this case we see the numerical error is slightly larger but this generally increases with the dimension of the matrix.
 
 ### Numerical stability
 In `R` a floating point number is stored as a `double` precision number. According to `IEEE754` standard a double number has 64 binary bits with:
@@ -41,11 +53,33 @@ To account for numerical innaccuracy can use `all.equal` instead. These errors c
 ## Sparse Matrices
 Sparse and dense matrices can be accessed with the `Matrix` package. Dense matrices are stored as `dgeMatrix`. It adds the `rankMatrix` and `rcond` functions. A sparse matrix is one where most entries are 0. It is inefficient to store all these 0's in the memory. Sparse matrices are generally stored as `dgCMatrix`. d stands for digit, g for general (not triangular or symmetric) and C for column (not row or triplet). A sparse matrix can be converted to dense at the cost of increased memory storage. A `dgCMatrix` is stored using the compressed sparse column (CSC) format. This stores the length of runs of zeros and non-zero entries. 
 
+```{r sparse}
+library(Matrix)
+set.seed(0)
+nrows = 100; ncols = 100
+vals = sample(x=c(0, 2, 4, 9), prob=c(0.97, 0.01, 0.01, 0.01), size=nrows*ncols, replace=TRUE)
+m1 = matrix(vals, nrow=nrows, ncol=ncols)
+m2 = Matrix(vals, nrow=nrows, ncol=ncols, sparse = TRUE)
+m1[1:2, 1:10]
+c(object.size(m1), object.size(m2))
+```
+
+We can see the sparse format is far more efficient with memory usage.
+
 ### Basic operations
 Multiplication and division retain the `dgCMatrix` format but addition or subtraction turn `dgC` into `dge`. A sparse matrix multiplied by a dense vector outputs a `dge` but two sparse matrices can be multiplied together and retain sparsity.
 
 ### Obtaining the dependency graph of R packages.
-We can use the `miniCRAN` package to build an `R` package depenedncy graph. This can be represented via an adjacency matrix `M`. The matrix is square with each row and column relating to a vertex. If there is an edge from $i$ to $j$ then $M_{i,j} =1$ else the entry is 0. Thus $M$ is usually sparse. 
+We can use the `miniCRAN` package to build an `R` package depenedncy graph. This can be represented via an adjacency matrix `M`. The matrix is square with each row and column relating to a vertex. If there is an edge from $i$ to $j$ then $M_{i,j} =1$ else the entry is 0. Thus $M$ is usually sparse. We look at the dependencies of `rmarkdown` below: 
+
+```{r package}
+library(miniCRAN) # for obtaining dependency relations of R packages
+g1 <- miniCRAN::makeDepGraph('rmarkdown', suggests = FALSE, enhances = FALSE)
+plot(g1)
+get.adjacency(g1)
+```
+
+So clearly this adjacency matrix would be a good candidate for a sparse representation.
 
 ### Solving large linear systems
-Sparse matrices can be even worse when inverting, the inverse of a sparse matrix is not necessarily sparse, should use `solve(A,b)` whenever possible. 
+Sparse matrices can be even worse when inverting, the inverse of a sparse matrix is not necessarily sparse, thus we should use `solve(A,b)` whenever possible. 

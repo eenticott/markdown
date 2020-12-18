@@ -34,12 +34,39 @@ optimize(f, interval = c(-0.8, 2))
 
 ```
 
-We see that `optimize` does indeed find the global minimum here, but changing the interval, even when the global minimum is still within can change the result. The function is based on the golden section search which can work well for a unimodal function where the minimum is within the interval. This is rarely the case but its one advantage is that it requires no evaluation of derivatives. 
+We see that `optimize` does indeed find the global minimum here, but changing the interval, even when the global minimum is still within, can change the result. The function is based on the golden section search which *can* work well for a unimodal function where the minimum is within the interval. This is rarely the case but its one advantage is that it requires no evaluation of derivatives and so can be widely used. 
 
 ### Newton's Method
 This aims to find the root of a function $g$, it relies on the Taylor expansion at $x_{0}$. We iterively apply:
 $$x \leftarrow x - \frac{g(x)}{g'(x)} $$
-To apply to an optimisation problem we solve for $f'(x)$ = 0. If the initial guess is close to a local minimum then the convergence is rapid but if it is far away it can converge to any local minimum or maximum. It also requires second derivatives which are not always available.
+To apply to an optimisation problem, we solve for $f'(x)$ = 0. If the initial guess is close to a local minimum then the convergence is rapid but if it is far away it can converge to any local minimum or maximum. It also requires second derivatives which are not always available. We apply this to the same function:
+```{r newton}
+f_sym = expression(2*sin(3*x) + 0.4*x^2 - 2)
+f1_sym = D(f_sym, 'x'); f1 = function(x) eval(f1_sym)
+f2_sym = D(f1_sym, 'x'); f2 = function(x) eval(f2_sym)
+
+newton <- function(f1, f2, init, tol, print) {
+  x = init
+  change = tol + 1
+  while (change > tol) {
+    x_pre = x
+    x = x - f1(x) / f2(x); if(print) {cat(x, '\n')}
+    change = abs(x - x_pre)
+  }
+  return(x)
+}
+
+newton(f1_sym, f2_sym, 1, 1e-6, TRUE)
+```
+
+We can see that it has converged to a local maximum instead of a minimum. We try with differnet starting values:
+```{r newton2}
+for (i in seq(-3, 3, 0.5)) {
+  print(newton(f1_sym, f2_sym, i, 1e-6, FALSE))
+}
+```
+
+So we see that in this case Newton's method only finds the correct minimum two times out of those tried.
 
 ### Multi-dimensional Optimisation
 There are three types of multi-dimensional algorithms:
@@ -52,14 +79,70 @@ There are three types of multi-dimensional algorithms:
 
 In `R` these optimisations can be done through the `nlm` function which uses a Newton-type or `optim` which has a choice.
 
+We will attempt to minimise the problem:
+```{r 2dfunc, warning=FALSE, message=FALSE}
+f = function(x, y) {
+  return(cos(x*y) *sin(2*x*y-5) + 2 * cos(3*x + y - 5) + 2*(x)^2 + 2*(y)^2 + 2)
+}
+
+library(pracma) # for meshgrid
+x = seq(-2, 2, length = 500)
+y = seq(-2, 2, length = 500)
+gridXY = meshgrid(x, y)
+z = matrix(mapply(f, gridXY$X, gridXY$Y), nrow = 500)
+contour(x, y, z)
+min(z)
+```
+
+We need to get a function for the derivatives and Hessian.
+```{r multi}
+f1 = deriv(expression(cos(x*y) *sin(2*x*y-5) + 2 * cos(3*x + y - 5) + 2*(x)^2 + 2*(y)^2 + 2), namevec = c('x', 'y'), function.arg=T, hessian=T)
+f1(0,0)
+```
+
+We try using Newton's method through `nlm` to minimise the function:
+```{r newtmeth}
+optim_results <- data.frame(minimum = numeric(), times = numeric())
+
+start = Sys.time()
+nlm_grad <- nlm(function(x) f1(x[1], x[2]), c(1,1))
+end = Sys.time()
+nlm_grad
+optim_results["nlm_with_grad",] <- c(nlm_grad$value,end - start)
+
+start = Sys.time()
+nlm_nograd <- nlm(function(x) f(x[1], x[2]), c(1,1))
+end = Sys.time()
+nlm_nograd
+optim_results["nlm_no_grad",] <- c(nlm_nograd$value,end - start)
+```
+
+We see if we give it the function without derivatives it takes more iterations.
+
 #### Simplex Methods
 The Nelder-Mead is the standard simplex method. It is a directed search comparing values at various points. It has the advantage of not requiring derivatives but it only converges to local minimima, it can converge to non-stationary points and it is slow. 
+```{r NM}
+start = Sys.time()
+NM <- optim(c(1, 1), function(x) f(x[1], x[2]), method = "Nelder-Mead")
+end = Sys.time()
+NM
+optim_results["Nelder-Mead",] <- c(NM$value,end - start)
+```
+
+We see this takes 73 iterations so we expect this to be quite slow.
 
 #### Gradient type methods
 The most popular method here is gradient descent. In order to minimise a differentiable function $f(x)$ we iterively take:
 $$x \leftarrow x - \gamma\nabla f(x) $$
 where $\gamma$ is a small step value. This is simple but is slow can can zigzag on certain functions. `optim` uses the conjugate gradient (CG) which is an improved version. The main idea is that each step should be conjugate toward search directions at previous step to avoid zigzag. If the function is quadratic then CG is guaranteed to reach the minimum in n-steps where function is n-dimensional. It performs better than steepest descent in all cases but not as well as Newton type methods.
 
+```{r grad}
+start = Sys.time()
+CG <- optim(c(1, 1), function(x) f(x[1], x[2]), method = "CG")
+end = Sys.time()
+CG
+optim_results["CG",] <- c(CG$value,end - start)
+```
 #### Newton type methods
 In the multi dimensional case Newton's method becomes:
 
@@ -67,8 +150,39 @@ $$x \leftarrow [H f(x)]^{-1} \nabla f(x) $$
 
 where we need the inverse of the Hessian. This can be expensive for multivariate problems as the Hessian can be very large. Quasi-Newton methods aim to replace this computation by a reasonable estimate. The most common quasi-newton method is `BFGS` which can be implemented by `optim`. The Hessian is approximated by $B_{k}$ and it's inverse $B_{k+1}^{-1}$ is computed using $B_{k}^{-1}$. As $B_{k}$ are dense this can cause memory problems in high dimensions, `L-BFGS` is the low memory version which stores a few vectors rather than a full approximation.
 
+```{r BFGS}
+start = Sys.time()
+BFGS <- optim(c(1, 1), function(x) f(x[1], x[2]), method = "BFGS")
+end = Sys.time()
+BFGS
+optim_results["BFGS",] <- c(BFGS$value,end - start)
+
+start = Sys.time()
+LBFGS <- optim(c(1, 1), function(x) f(x[1], x[2]), method = "L-BFGS-B")
+end = Sys.time()
+LBFGS
+optim_results["L-BFGS-B",] <- c(LBFGS$value,end - start)
+```
+
+
+
 #### Simulated annealing
 Simulated annealing claims to always find the global minimum, but it is slow and can often fail to find the global minimum regardless. It only uses the value of the function like the simplex method. In `optim` the implementation is done with a Metropolis function for acceptance probability. 
+
+```{r SANN}
+start = Sys.time()
+SANN <- optim(c(1, 1), function(x) f(x[1], x[2]), method = "SANN")
+end = Sys.time()
+SANN
+optim_results["SANN",] <- c(SANN$value,end - start)
+```
+
+We now look at the results for each of the methods
+```{r times}
+optim_results
+```
+
+We see that for time taken, all the functions perform similarly in this case apart from simulated annealing which takes just over twice as long as the next slowest. Surprisingly BFGS also seems to have encountered some problems as it does not converge to the correct point and ran slightly slower, though the low memory version did converge correctly.  Neither of the `nlm` implementations found the correct minimum although as it is smaller than the expected minimum it seems they have found one outside the area in which we were looking.
 
 ### Nonlinear least squares problems
 With dataset $(x_{1}, y_{1}), ...,(x_{m}, y_{m})$ and model $y = f(x,  \beta)$ where $\beta$ are the parameters of the model $f$ we define residuals $r_{i} (\beta) = y_{i} - f(x_{i}, \beta)$. In a nonlinear least squares problem we aim to find $\beta$ such that the sum of squared residuals is minimised. There a subclass of optimisation algorithms designed for nonlinear functions. 
