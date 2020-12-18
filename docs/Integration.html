@@ -408,7 +408,29 @@ div.tocify {
 </div>
 <div id="composite-polynomial-interpolation" class="section level3">
 <h3>Composite polynomial interpolation</h3>
-<p>An alternative approach to fitting a high degree polynomial to many points is to fit lower degree polynomials on subintervals of the domain. This results in a piecewise polynomial approximation. For simplicity we consider the region <span class="math inline">\([a,b]\)</span> partitioned into equal length subintervals. The scheme is ‘closed’ if we inclue the endpoints and ‘open’ if we do not. Some examples are given below. For a large number of subintervals the product term in the Interpolation Error can be made very small.</p>
+<p>An alternative approach to fitting a high degree polynomial to many points is to fit lower degree polynomials on subintervals of the domain. This results in a piecewise polynomial approximation. For simplicity we consider the region <span class="math inline">\([a,b]\)</span> partitioned into equal length subintervals. The scheme is ‘closed’ if we inclue the endpoints and ‘open’ if we do not. For a large number of subintervals the product term in the Interpolation Error can be made very small.</p>
+<p>Some code for finding subintervals of equal size is given:</p>
+<pre class="r"><code># get the endpoints of the subintervals
+get.subinterval.points &lt;- function(a, b, nintervals) {
+  return(seq(a, b, length.out=nintervals+1))
+}
+
+# returns which subinterval a point x is in
+get.subinterval &lt;- function(x, a, b, nintervals) {
+  h &lt;- (b-a)/nintervals
+  return(min(max(1,ceiling((x-a)/h)),nintervals))
+}
+
+# get the k interpolation points in the interval
+# this depends on the whether the scheme is open or closed
+get.within.subinterval.points &lt;- function(a, b, k, closed) {
+  if (closed) {
+    return(seq(a, b, length.out=k))
+  } else {
+    h &lt;- (b-a)/(k+1)
+    return(seq(a+h,b-h,h))
+  }
+}</code></pre>
 </div>
 <div id="other-polynomial-interpolation-schemes" class="section level3">
 <h3>Other polynomial interpolation schemes</h3>
@@ -419,7 +441,13 @@ div.tocify {
 <p>We consider approximating the integral: <span class="math display">\[I(f) := \int_{a}^{b}f(x)dx, \]</span> where <span class="math inline">\(f \in C^{0}([a,b])\)</span>. All approximations that we consider involve computing integrals associated with polynomial approximations such as we have considered above. The approximations are often referred to as <em>quadrature rules</em>.</p>
 <div id="changing-limits-of-integration" class="section level4">
 <h4>Changing limits of integration</h4>
-<p>For constants <span class="math inline">\(a &lt; b\)</span> and <span class="math inline">\(c &lt; d\)</span> we can accomodate a change of finite interval via: <span class="math display">\[ \int_{a}^{b}f(x)dx = \int_{c}^{d}g(y)dy, \]</span> defining <span class="math display">\[g(y) := \frac{b-a}{d-c}g \Big{(}a + \frac{b-a}{d-c}(y-c)\Big{)}. \]</span></p>
+<p>For constants <span class="math inline">\(a &lt; b\)</span> and <span class="math inline">\(c &lt; d\)</span> we can accomodate a change of finite interval via: <span class="math display">\[ \int_{a}^{b}f(x)dx = \int_{c}^{d}g(y)dy, \]</span> defining <span class="math display">\[g(y) := \frac{b-a}{d-c}g \Big{(}a + \frac{b-a}{d-c}(y-c)\Big{)}. \]</span> Some code for implementing this:</p>
+<pre class="r"><code>change.domain &lt;- function(f, a, b, c, d) {
+  g &lt;- function(y) {
+    return((b-a)/(d-c)*f(a + (b-a)/(d-c)*(y-c)))
+  }
+  return(g)
+}</code></pre>
 </div>
 </div>
 <div id="integrating-the-interpolating-polynomial-approximation" class="section level3">
@@ -428,7 +456,23 @@ div.tocify {
 </div>
 <div id="newton-cotes-rules" class="section level3">
 <h3>Newton-Cotes rules</h3>
-<p>The <em>rectangular rule</em> corresponds to a closed scheme with <span class="math inline">\(k = 1\)</span>: <span class="math display">\[\hat{I}_{\rm rectangular}(f) = (b-a) f(a). \]</span> The <em>midpoint rule</em> corresponds to an open scheme with <span class="math inline">\(k=1\)</span>: <span class="math display">\[\hat{I}_{\rm midpoint}(f) = (b-a) f \left ( \frac{a+b}{2} \right). \]</span> The <em>trapezoidal rule</em> corresponds to a closed scheme with <span class="math inline">\(k=2\)</span>: <span class="math display">\[\hat{I}_{\rm trapezoidal}(f) = \frac{b-a}{2} \{ f(a)+f(b) \}. \]</span> <em>Simpson’s rule</em> corresponds to a closed scheme with <span class="math inline">\(k=3\)</span>. We obtain: <span class="math display">\[\hat{I}_{\rm Simpson}(f) = \frac{b-a}{6} \left \{ f(a) + 4 f \left ( \frac{a+b}{2} \right) + f(b) \right \}. \]</span></p>
+<p>The <em>rectangular rule</em> corresponds to a closed scheme with <span class="math inline">\(k = 1\)</span>: <span class="math display">\[\hat{I}_{\rm rectangular}(f) = (b-a) f(a). \]</span> The <em>midpoint rule</em> corresponds to an open scheme with <span class="math inline">\(k=1\)</span>: <span class="math display">\[\hat{I}_{\rm midpoint}(f) = (b-a) f \left ( \frac{a+b}{2} \right). \]</span> The <em>trapezoidal rule</em> corresponds to a closed scheme with <span class="math inline">\(k=2\)</span>: <span class="math display">\[\hat{I}_{\rm trapezoidal}(f) = \frac{b-a}{2} \{ f(a)+f(b) \}. \]</span> <em>Simpson’s rule</em> corresponds to a closed scheme with <span class="math inline">\(k=3\)</span>. We obtain: <span class="math display">\[\hat{I}_{\rm Simpson}(f) = \frac{b-a}{6} \left \{ f(a) + 4 f \left ( \frac{a+b}{2} \right) + f(b) \right \}. \]</span> A simple implementation in R is given below:</p>
+<pre class="r"><code>newton.cotes &lt;- function(f, a, b, k, closed) {
+  if (k == 1) {
+    if (closed) {
+      return((b-a)*f(a))
+    } else {
+      return((b-a)*f((a+b)/2))
+    }
+  }
+  if (k == 2 &amp;&amp; closed) {
+    return((b-a)/2*(f(a)+f(b)))
+  }
+  if (k == 3 &amp;&amp; closed) {
+    return((b-a)/6*(f(a)+4*f((a+b)/2)+f(b)))
+  }
+  stop(&quot;not implemented&quot;)
+}</code></pre>
 <p>It is possible to obtain a crude bound on the error of these schemes. We find that often the <em>midpoint</em> rule can perform better than the <em>trapezoid rule</em> even though it requires less points.</p>
 </div>
 <div id="composite-rules" class="section level3">
@@ -437,7 +481,78 @@ div.tocify {
 </div>
 <div id="gaussian-quadrature" class="section level3">
 <h3>Gaussian quadrature</h3>
-<p>Guassian quadrature is similar to Chebyshev points in that it exploits the freedom of interpolation points ot reduce the error of the approximate integral in the form: <span class="math display">\[ I = \int_{a}^{n}f(x)w(x)dx \]</span> where <span class="math inline">\(w\)</span> is continuous and positive on <span class="math inline">\((a,b)\)</span> and <span class="math inline">\(\forall n \in \mathbb{N},\int_{a}^{b}x^{n}w(x)dx\)</span> is finite. Defining the function space: <span class="math display">\[ L_{w}^{2}([a,b]) := \Big{\{} f: \int_{a}^{b} f(x)^{2}w(x)dx &lt; \infty \Big{\}} \]</span> There exists a unique sequencce of orthogonal polynomials <span class="math inline">\(p_{0},p_{1},...\)</span> in <span class="math inline">\(L_{w}^{2}([a,b])\)</span> that are monic. These can be found using the <strong>Gram-Schmidt process</strong>. We choose the interpolation points as the <span class="math inline">\(k\)</span> roots of <span class="math inline">\(p_{k}\)</span> for the Gaussian quadrature rule.</p>
+<p>Guassian quadrature is similar to Chebyshev points in that it exploits the freedom of interpolation points ot reduce the error of the approximate integral in the form: <span class="math display">\[ I = \int_{a}^{n}f(x)w(x)dx \]</span> where <span class="math inline">\(w\)</span> is continuous and positive on <span class="math inline">\((a,b)\)</span> and <span class="math inline">\(\forall n \in \mathbb{N},\int_{a}^{b}x^{n}w(x)dx\)</span> is finite. Defining the function space: <span class="math display">\[ L_{w}^{2}([a,b]) := \Big{\{} f: \int_{a}^{b} f(x)^{2}w(x)dx &lt; \infty \Big{\}} \]</span> There exists a unique sequencce of orthogonal polynomials <span class="math inline">\(p_{0},p_{1},...\)</span> in <span class="math inline">\(L_{w}^{2}([a,b])\)</span> that are monic. These can be found using the <strong>Gram-Schmidt process</strong>. We choose the interpolation points as the <span class="math inline">\(k\)</span> roots of <span class="math inline">\(p_{k}\)</span> for the Gaussian quadrature rule. For a composite Gauss-Legendre rule we have:</p>
+<p><span class="math display">\[ \hat{I}^{m}_{\rm Gauss-Legendre}(f) = \frac{(b-a)^{2k + 1}(k!)^{4}}{(2k + 1)\{ (2k)!\}^{3}}f^{(2k)}(\xi) \]</span></p>
+<pre class="r"><code>gauss.legendre.canonical &lt;- function(f, k) {
+  if (k == 1) {
+    return(2*f(0))
+  }
+  if (k == 2) {
+    return(f(-1/sqrt(3)) + f(1/sqrt(3)))
+  }
+  if (k == 3) {
+    return(5/9*f(-sqrt(3/5)) + 8/9*f(0) + 5/9*f(sqrt(3/5)))
+  }
+  if (k == 4) {
+    tmp &lt;- 2/7*sqrt(6/5)
+    xs &lt;- rep(0, 4)
+    xs[1] &lt;- sqrt(3/7 - tmp)
+    xs[2] &lt;- -sqrt(3/7 - tmp)
+    xs[3] &lt;- sqrt(3/7 + tmp)
+    xs[4] &lt;- -sqrt(3/7 + tmp)
+    ws &lt;- rep(0, 4)
+    ws[1] &lt;- ws[2] &lt;- (18+sqrt(30))/36
+    ws[3] &lt;- ws[4] &lt;- (18-sqrt(30))/36
+    return(sum(ws*vapply(xs, f, 0)))
+  }
+  if (k == 5) {
+    tmp &lt;- 2*sqrt(10/7)
+    xs &lt;- rep(0, 4)
+    xs[1] &lt;- 0
+    xs[2] &lt;- 1/3*sqrt(5 - tmp)
+    xs[3] &lt;- -1/3*sqrt(5 - tmp)
+    xs[4] &lt;- 1/3*sqrt(5 + tmp)
+    xs[5] &lt;- -1/3*sqrt(5 + tmp)
+    ws &lt;- rep(0, 5)
+    ws[1] &lt;- 128/225
+    ws[2] &lt;- ws[3] &lt;- (322 + 13*sqrt(70))/900
+    ws[4] &lt;- ws[5] &lt;- (322 - 13*sqrt(70))/900
+    return(sum(ws*vapply(xs, f, 0)))
+  }
+  stop(&quot;not implemented&quot;)
+}
+
+gauss.legendre &lt;- function(f, a, b, k) {
+  g &lt;- change.domain(f, a, b, -1, 1)  
+  gauss.legendre.canonical(g, k)
+}
+
+
+composite.gauss.legendre &lt;- function(f, a, b, subintervals, k) {
+  rule &lt;- function(f, left, right) {
+    gauss.legendre(f, left, right, k)
+  }
+  return(composite.rule(f, a, b, subintervals, rule))
+}
+
+composite.gl.3 &lt;- vapply(ms, function(m) composite.gauss.legendre(sin, 0, 10, m, 3), 0)
+composite.gl.3[log(abs(composite.gl.3 - val)) &lt; -33] &lt;- NA
+
+composite.gl.4 &lt;- vapply(ms, function(m) composite.gauss.legendre(sin, 0, 10, m, 4), 0)
+composite.gl.4[log(abs(composite.gl.4 - val)) &lt; -33] &lt;- NA
+
+composite.gl.5 &lt;- vapply(ms, function(m) composite.gauss.legendre(sin, 0, 10, m, 5), 0)
+composite.gl.5[log(abs(composite.gl.5 - val)) &lt; -33] &lt;- NA
+
+tg3 &lt;- tibble(m=ms, rule=&quot;gauss-legendre 3&quot;, log.error=log(abs(composite.gl.3- val)),
+            theory=log(0.18*factorial(3)^4/factorial(2*3)^3/(2*3+1)*10^7/ms^6))
+tg4 &lt;- tibble(m=ms, rule=&quot;gauss-legendre 4&quot;, log.error=log(abs(composite.gl.4- val)),
+            theory=log(0.18*factorial(4)^4/factorial(2*4)^3/(2*4+1)*10^9/ms^8))
+tg5 &lt;- tibble(m=ms, rule=&quot;gauss-legendre 5&quot;, log.error=log(abs(composite.gl.5- val)),
+            theory=log(0.18*factorial(5)^4/factorial(2*5)^3/(2*5+1)*10^11/ms^10))
+tib &lt;- bind_rows(tr, tt, tm, ts, tg3, tg4, tg5)
+ggplot(tib, aes(x=m, colour=rule)) + geom_point(aes(y=log.error), na.rm=TRUE) + geom_line(aes(y=theory))</code></pre>
+<p><img src="Integration_files/figure-html/imp-1.png" width="672" /> We see that the Gauss-Legendre implementations offer a far quicker convergence rate compared to the previous best which was Simpson’s rule.</p>
 </div>
 <div id="practical-algorithms" class="section level3">
 <h3>Practical algorithms</h3>
@@ -463,17 +578,108 @@ div.tocify {
 </div>
 <div id="error-compared-to-quadrature" class="section level3">
 <h3>Error compared to quadrature</h3>
-<p>This i sa slow convergence rate compared to quadrature rules in one dimension. Dimension does not directly affect convergence however <span class="math inline">\(\bar{f}\)</span> can be very large for large <span class="math inline">\(d\)</span>.</p>
+<p>This is a slow convergence rate compared to quadrature rules in one dimension. Dimension does not directly affect convergence however <span class="math inline">\(\bar{f}\)</span> can be very large for large <span class="math inline">\(d\)</span>.</p>
 </div>
 <div id="sampling" class="section level3">
 <h3>Sampling</h3>
+<div id="perfect-sampling" class="section level4">
+<h4>Perfect sampling</h4>
 <p>There are several sampling methods available. If we can simulate random variates <span class="math inline">\(\pi\)</span> on a computer then this is called perfect sampling.</p>
+</div>
+<div id="rejection-sampling" class="section level4">
+<h4>Rejection sampling</h4>
 <p>Another more applicable is rejection sampling. This applies when one can sample <span class="math inline">\(\mu\)</span>-distributed random variates from proposal distribution <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\pi/\mu\)</span> satisfies <span class="math inline">\(\sup_{x\in X}\pi(x)/\mu(x) \leq M &lt; \infty\)</span>. The algorithm is: * Sample <span class="math inline">\(X \sim \mu\)</span></p>
 <ul>
 <li>With probability <span class="math inline">\(\frac{1}{M}\frac{\pi(X)}{\mu(X)}\)</span> output X, otherwise go to step 1</li>
 </ul>
-<p>Rejection sampling works best when the proposal distribution is close to the true distribution but it is not required. In many practical applications <span class="math inline">\(M\)</span> is prohibitively large.</p>
-<p>We can also do importance sampling and self-normalized importance sampling.</p>
+<p>Rejection sampling works best when the proposal distribution is close to the true distribution as this will cause more samples to be accepted however it is not required. In many practical applications <span class="math inline">\(M\)</span> is prohibitively large. A simple rejection sampling implementation is given below:</p>
+<pre class="r"><code>rejection.sample &lt;- function(pi, mu, M) {
+  while (TRUE) {
+    x &lt;- mu$sample()
+    y &lt;- runif(1) &lt; pi(x)/mu$density(x)/M
+    if (y) {
+      return(x)
+    }
+  }
+}</code></pre>
+</div>
+<div id="importance-sampliong" class="section level4">
+<h4>Importance sampliong</h4>
+<p>Importance sampling assumes <span class="math inline">\(\pi(x) &gt; 0 \rightarrow \mu(x) &gt; 0\)</span>. Importance sampling is motivated by expressing <span class="math inline">\(\pi(f)\)</span> as an integral w.r.t. <span class="math inline">\(\mu\)</span>. We find <span class="math inline">\(\pi(f) = \mu(f \cdot w)\)</span> where <span class="math inline">\(w(x) = \pi(x)/\mu(x)\)</span>. This justifies using <span class="math inline">\(n^{-1}S_{n}(f \cdot w)\)</span> as an approximation of <span class="math inline">\(\pi(f)\)</span>. In many cases importance sampling is used because it is not known how to sample <span class="math inline">\(pi\)</span>-distributed random variables. In this case it is sufficient to have <span class="math inline">\(w\)</span> uniformly bounded to ensure <span class="math inline">\(f \in L^{2}(X, \pi) \rightarrow f \cdot w \notin L^{2}(X, \mu)\)</span>. In high dimensions it is common for the variance to be prohibitively large for reasonable values of <span class="math inline">\(n\)</span>.</p>
+</div>
+</div>
+</div>
+<div id="markov-chain-monte-carlo" class="section level2">
+<h2>Markov chain Monte Carlo</h2>
+<p>Assume on measureable space <span class="math inline">\((X, \mathcal{X})\)</span> and that <span class="math inline">\(\mathcal{X}\)</span> is countably generated. Let <span class="math inline">\(\mathbf{X} := (X_{n})_{n \geq 0}\)</span> be a discrete time Markov chain evolving on X for some initial <span class="math inline">\(X_{0}\)</span>. This means for <span class="math inline">\(A \in \mathcal{X}\)</span>:</p>
+<p><span class="math display">\[ P(X_{n} \in A|X_{0} = x_{0},...,X_{n-1}=x_{n-1}) = P(X_{n} \in A | X_{n-1} = x_{n-1}). \]</span></p>
+<p>Suppose <span class="math inline">\(\mathbf{X}\)</span> is a time-homogenous positive Harris Markovchain with invariant probability mesasure <span class="math inline">\(\pi\)</span>. Then for all $ f L_{1}(X, ) = {f:(|f|) },$</p>
+<p><span class="math display">\[ \lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \pi(f), \]</span></p>
+<p>almost surely for any initial distribution X_{0}.</p>
+<div id="metropolis-hastings" class="section level3">
+<h3>Metropolis-Hastings</h3>
+<p>The most commonly used Markov chains in practice are constructed using Metropolis-Hastings Markov transition kernels.</p>
+<div id="algorithm" class="section level4">
+<h4>Algorithm</h4>
+<p>Assume <span class="math inline">\(\pi\)</span> has a density w.r.t. some measure <span class="math inline">\(\lambda\)</span>. For a target <span class="math inline">\(\pi\)</span> we only need to specifiy a proposal Markov kernel <span class="math inline">\(Q\)</span> admitting a density <span class="math inline">\(q\)</span> w.r.t. <span class="math inline">\(\lambda\)</span>. <span class="math display">\[ Q(x, dz) = q(x, z)\lambda(dz). \]</span></p>
+<p>To simulate according to <span class="math inline">\(P_{MH}(x,\cdot)\)</span>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Simulate <span class="math inline">\(Z \sim Q(x,\cdot)\)</span></p></li>
+<li><p>With prob <span class="math inline">\(\alpha_{MH}(x, Z)\)</span> output <span class="math inline">\(Z\)</span>. Otherwise output <span class="math inline">\(x\)</span>. We define: <span class="math display">\[ \alpha_{MH}(x, z) := \min \bigg{(}1, \frac{\pi(z)q(z,x)}{\pi(x)q(x, z)}\bigg{)} \]</span></p></li>
+</ol>
+<p>So we only need to be able to simulate from <span class="math inline">\(Q(x,\cdot)\)</span> and know the density <span class="math inline">\(\pi\)</span> up to a normalizing constant to simulate from <span class="math inline">\(P_{MH}(x, \cdot)\)</span>. A common choice for the MH kernel is the normal distribution, in this case <span class="math inline">\(q\)</span> is symmetric so <span class="math inline">\(\alpha_{MH}(x ,z) = \min(1, \pi(z)/\pi(x))\)</span>.</p>
+<pre class="r"><code># Proposal must be a function that returns a random deviate some distibution i.e. rnorm, rbinom
+make_proposal &lt;- function(proposal, ...) {
+  Q &lt;- function() proposal(1, ...)
+}
+
+# Note: this simple implementation assumes symmetric proposal
+MH_chain &lt;- function(pi, Q, init, n) {
+  x &lt;- init
+  xs &lt;- rep(0, n)
+  for (i in 1:n) {
+    z &lt;- x + Q()
+    p &lt;- min(1, pi(z)/pi(x))
+    x &lt;- sample(c(x, z), size = 1, prob = c(1-p, p))
+    xs[i] &lt;- x
+  }
+  return(xs)
+}</code></pre>
+<p>Then we can implement this to simulate a beta distribution with shape parameters <span class="math inline">\(\alpha = 0.5, \beta = 0.5\)</span>.</p>
+<pre class="r"><code>Q &lt;- make_proposal(rnorm,mean = 0, sd = 1)
+pi &lt;- function(x) dbeta(x, shape1 = 0.5, shape2 = 0.5)
+xs &lt;- MH_chain(pi, Q, 0.5, 1000000)
+plot(density(xs))
+vs &lt;- seq(0, 1, 0.01)
+lines(vs, dbeta(vs, 0.5, 0.5), col = &quot;blue&quot;)</code></pre>
+<p><img src="Integration_files/figure-html/MHimp-1.png" width="672" /></p>
+<p>We can see the Metropolis Hastings produces a fairly close fit.</p>
+<p>Finally we look at how the proposal standard deviation controls the chain. We use medium jumps:</p>
+<pre class="r"><code>Q &lt;- make_proposal(rnorm, sd = 1)
+xs &lt;- MH_chain(dnorm, Q, 0, 1000)
+plot(xs)</code></pre>
+<p><img src="Integration_files/figure-html/meddev-1.png" width="672" /></p>
+<p>Small jumps:</p>
+<pre class="r"><code>Q &lt;- make_proposal(rnorm, sd = 0.1)
+xs &lt;- MH_chain(dnorm, Q, 0, 1000)
+plot(xs)</code></pre>
+<p><img src="Integration_files/figure-html/smalldev-1.png" width="672" /> and large jumps:</p>
+<pre class="r"><code>Q &lt;- make_proposal(rnorm, sd = 10)
+xs &lt;- MH_chain(dnorm, Q, 0, 1000)
+plot(xs)</code></pre>
+<p><img src="Integration_files/figure-html/bigdev-1.png" width="672" /></p>
+<p>It is important to cater jump sizes to the nature of the problem.</p>
+</div>
+</div>
+<div id="validitity" class="section level3">
+<h3>Validitity</h3>
+<p>It order to show P leaves <span class="math inline">\(\pi\)</span> invariant we need to check <span class="math inline">\(\pi P = \pi\)</span>. it can be shown that any <span class="math inline">\(\pi\)</span>-reversible Markov chain is a stationary Markov chain with invariant probability <span class="math inline">\(\pi\)</span>. We can also show that any Metropolis Hastings Markov chain is <span class="math inline">\(\pi\)</span>-reversible.</p>
+</div>
+<div id="combining-markov-kernels" class="section level3">
+<h3>Combining Markov kernels</h3>
+<p>We can construct <span class="math inline">\(\pi\)</span>-invariant Markov chains out of different <span class="math inline">\(\pi\)</span>-invariant Markov transition kernels. Hybrid chains like this are common, such as the Gibbs sampler. A Markov kernel <span class="math inline">\(P\)</span> is a mixture of Markov kernels <span class="math inline">\((P_{s})_{s \in S}\)</span> if:</p>
+<p><span class="math display">\[P(x, A) = \sum_{s \in S}w(s)P_{s}(x, A), \]</span></p>
+<p>where <span class="math inline">\(w\)</span> is a p.m.f. This can be used to construct more sophisticated Markov chains as we know a mixture of <span class="math inline">\(\pi\)</span>-invariant Markov kernels is <span class="math inline">\(\pi\)</span>-invariant.</p>
 </div>
 </div>
 

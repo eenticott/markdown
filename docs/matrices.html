@@ -398,9 +398,9 @@ div.tocify {
 <pre class="r"><code>A = matrix(c(rnorm(10^2, 3, 0.5)), nrow = 10)
 b = rnorm(10)
 norm(A %*% solve(A, b) - b)</code></pre>
-<pre><code>## [1] 1.575823e-14</code></pre>
+<pre><code>## [1] 1.057557e-13</code></pre>
 <pre class="r"><code>norm(A %*% solve(A)%*% b - b)</code></pre>
-<pre><code>## [1] 1.837419e-14</code></pre>
+<pre><code>## [1] 7.822909e-14</code></pre>
 <p>In this case we see the numerical error is slightly larger but this generally increases with the dimension of the matrix.</p>
 </div>
 <div id="numerical-stability" class="section level3">

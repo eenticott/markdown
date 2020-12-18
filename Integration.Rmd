@@ -9,6 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
 ## Integration
@@ -34,7 +35,32 @@ $$ \frac{cos(2i-1)}{2k}\pi, \; i \in \{1,...,k \},$$
 This bounds the absolute value of the product term by $2^{1-k}$. There still exist functions that diverge on Chebyshev points but these are usually quite complex. These only apply to differentiable functions.
 
 ### Composite polynomial interpolation
-An alternative approach to fitting a high degree polynomial to many points is to fit lower degree polynomials on subintervals of the domain. This results in a piecewise polynomial approximation. For simplicity we consider the region $[a,b]$ partitioned into equal length subintervals. The scheme is 'closed' if we inclue the endpoints and 'open' if we do not. Some examples are given below. For a large number of subintervals the product term in the Interpolation Error can be made very small.
+An alternative approach to fitting a high degree polynomial to many points is to fit lower degree polynomials on subintervals of the domain. This results in a piecewise polynomial approximation. For simplicity we consider the region $[a,b]$ partitioned into equal length subintervals. The scheme is 'closed' if we inclue the endpoints and 'open' if we do not. For a large number of subintervals the product term in the Interpolation Error can be made very small. 
+
+Some code for finding subintervals of equal size is given:
+```{r subint}
+# get the endpoints of the subintervals
+get.subinterval.points <- function(a, b, nintervals) {
+  return(seq(a, b, length.out=nintervals+1))
+}
+
+# returns which subinterval a point x is in
+get.subinterval <- function(x, a, b, nintervals) {
+  h <- (b-a)/nintervals
+  return(min(max(1,ceiling((x-a)/h)),nintervals))
+}
+
+# get the k interpolation points in the interval
+# this depends on the whether the scheme is open or closed
+get.within.subinterval.points <- function(a, b, k, closed) {
+  if (closed) {
+    return(seq(a, b, length.out=k))
+  } else {
+    h <- (b-a)/(k+1)
+    return(seq(a+h,b-h,h))
+  }
+}
+```
 
 ### Other polynomial interpolation schemes
 There are more polynomial interpolation schemes. You can use polynomials that incorporate derivatives of $f$ as well as $f$, this is known as Hermite interpolation. Matching derivatives at the boundaries of subintervals in piecewise polynomial interpolation is called spline interpolation. Cubic splines are a very popular way of approximating a function.
@@ -49,7 +75,15 @@ For constants $a < b$ and $c < d$ we can accomodate a change of finite interval 
 $$ \int_{a}^{b}f(x)dx = \int_{c}^{d}g(y)dy, $$
 defining
 $$g(y) := \frac{b-a}{d-c}g \Big{(}a + \frac{b-a}{d-c}(y-c)\Big{)}. $$
-
+Some code for implementing this:
+```{r cod}
+change.domain <- function(f, a, b, c, d) {
+  g <- function(y) {
+    return((b-a)/(d-c)*f(a + (b-a)/(d-c)*(y-c)))
+  }
+  return(g)
+}
+```
 ### Integrating the interpolating polynomial approximation
 If we have a Lagrange polynomial $p_{k-1}$ over [a,b] we have:
 $$I(p_{k-1}) = \sum_{i=1}^{k}f(x_{i})\int_{a}^{b}l_{i}(x) .$$
@@ -64,7 +98,25 @@ The *trapezoidal rule* corresponds to a closed scheme with $k=2$:
 $$\hat{I}_{\rm trapezoidal}(f) = \frac{b-a}{2} \{ f(a)+f(b) \}. $$
 *Simpson's rule* corresponds to a closed scheme with $k=3$. We obtain:
 $$\hat{I}_{\rm Simpson}(f) = \frac{b-a}{6} \left \{ f(a) + 4 f \left ( \frac{a+b}{2} \right) + f(b) \right \}. $$
-
+A simple implementation in R is given below:
+```{r}
+newton.cotes <- function(f, a, b, k, closed) {
+  if (k == 1) {
+    if (closed) {
+      return((b-a)*f(a))
+    } else {
+      return((b-a)*f((a+b)/2))
+    }
+  }
+  if (k == 2 && closed) {
+    return((b-a)/2*(f(a)+f(b)))
+  }
+  if (k == 3 && closed) {
+    return((b-a)/6*(f(a)+4*f((a+b)/2)+f(b)))
+  }
+  stop("not implemented")
+}
+```
 It is possible to obtain a crude bound on the error of these schemes. We find that often the *midpoint* rule can perform better than the *trapezoid rule* even though it requires less points.
 
 ### Composite rules
@@ -77,7 +129,127 @@ Guassian quadrature is similar to Chebyshev points in that it exploits the freed
 $$ I = \int_{a}^{n}f(x)w(x)dx $$
 where $w$ is continuous and positive on $(a,b)$ and $\forall n \in \mathbb{N},\int_{a}^{b}x^{n}w(x)dx$ is finite.  Defining the function space:
 $$ L_{w}^{2}([a,b]) := \Big{\{} f: \int_{a}^{b} f(x)^{2}w(x)dx < \infty \Big{\}} $$
-There exists a unique sequencce of orthogonal polynomials $p_{0},p_{1},...$ in $L_{w}^{2}([a,b])$ that are monic. These can be found using the **Gram-Schmidt process**. We choose the interpolation points as the $k$ roots of $p_{k}$ for the Gaussian quadrature rule.
+There exists a unique sequencce of orthogonal polynomials $p_{0},p_{1},...$ in $L_{w}^{2}([a,b])$ that are monic. These can be found using the **Gram-Schmidt process**. We choose the interpolation points as the $k$ roots of $p_{k}$ for the Gaussian quadrature rule. For a composite Gauss-Legendre rule we have:
+
+$$ \hat{I}^{m}_{\rm Gauss-Legendre}(f) = \frac{(b-a)^{2k + 1}(k!)^{4}}{(2k + 1)\{ (2k)!\}^{3}}f^{(2k)}(\xi) $$
+
+```{r echo=FALSE}
+composite.rule <- function(f, a, b, subintervals, rule) {
+  subinterval.points <- get.subinterval.points(a, b, subintervals)
+  s <- 0
+  for (i in 1:subintervals) {
+    left <- subinterval.points[i]
+    right <- subinterval.points[i+1]
+    s <- s + rule(f, left, right)
+  }
+  return(s)
+}
+
+# composite Newton--Cotes
+composite.nc <- function(f, a, b, subintervals, k, closed) {
+  rule <- function(f, left, right) {
+    newton.cotes(f, left, right, k, closed)
+  }
+  return(composite.rule(f, a, b, subintervals, rule))
+}
+
+ms <- c(10:19, seq(20, 500, 10))
+
+composite.rectangular <- vapply(ms, function(m) composite.nc(sin, 0, 10, m, 1, TRUE), 0)
+
+composite.midpoints <- vapply(ms, function(m) composite.nc(sin, 0, 10, m, 1, FALSE), 0)
+
+composite.trapezoidal <- vapply(ms, function(m) composite.nc(sin, 0, 10, m, 2, TRUE), 0)
+
+composite.simpsons <- vapply(ms, function(m) composite.nc(sin, 0, 10, m, 3, TRUE), 0)
+
+val <- 1-cos(10) # integral of sin(x) for x=0..10
+v1 <- -sin(10)/10 # integral of sin'(x)/10 for x=0..10
+v2 <- val/10 # integral of sin(x)/10 for x=0..10
+
+tr <- tibble(m=ms, rule="rectangular", log.error=log(composite.rectangular - val),
+             theory=log(v1*1/2*10^2/ms))
+tt <- tibble(m=ms, rule="trapezoidal", log.error=log(val - composite.trapezoidal),
+             theory=log(v2*1/12*10^3/ms^2))
+tm <- tibble(m=ms, rule="midpoints", log.error=log(composite.midpoints - val),
+            theory=log(v2*1/24*10^3/ms^2))
+ts <- tibble(m=ms, rule="simpsons", log.error=log(composite.simpsons - val),
+            theory=log(v2*1/2880*10^5/ms^4))
+tib <- bind_rows(tr, tt, tm, ts)
+```
+
+```{r imp}
+gauss.legendre.canonical <- function(f, k) {
+  if (k == 1) {
+    return(2*f(0))
+  }
+  if (k == 2) {
+    return(f(-1/sqrt(3)) + f(1/sqrt(3)))
+  }
+  if (k == 3) {
+    return(5/9*f(-sqrt(3/5)) + 8/9*f(0) + 5/9*f(sqrt(3/5)))
+  }
+  if (k == 4) {
+    tmp <- 2/7*sqrt(6/5)
+    xs <- rep(0, 4)
+    xs[1] <- sqrt(3/7 - tmp)
+    xs[2] <- -sqrt(3/7 - tmp)
+    xs[3] <- sqrt(3/7 + tmp)
+    xs[4] <- -sqrt(3/7 + tmp)
+    ws <- rep(0, 4)
+    ws[1] <- ws[2] <- (18+sqrt(30))/36
+    ws[3] <- ws[4] <- (18-sqrt(30))/36
+    return(sum(ws*vapply(xs, f, 0)))
+  }
+  if (k == 5) {
+    tmp <- 2*sqrt(10/7)
+    xs <- rep(0, 4)
+    xs[1] <- 0
+    xs[2] <- 1/3*sqrt(5 - tmp)
+    xs[3] <- -1/3*sqrt(5 - tmp)
+    xs[4] <- 1/3*sqrt(5 + tmp)
+    xs[5] <- -1/3*sqrt(5 + tmp)
+    ws <- rep(0, 5)
+    ws[1] <- 128/225
+    ws[2] <- ws[3] <- (322 + 13*sqrt(70))/900
+    ws[4] <- ws[5] <- (322 - 13*sqrt(70))/900
+    return(sum(ws*vapply(xs, f, 0)))
+  }
+  stop("not implemented")
+}
+
+gauss.legendre <- function(f, a, b, k) {
+  g <- change.domain(f, a, b, -1, 1)  
+  gauss.legendre.canonical(g, k)
+}
+
+
+composite.gauss.legendre <- function(f, a, b, subintervals, k) {
+  rule <- function(f, left, right) {
+    gauss.legendre(f, left, right, k)
+  }
+  return(composite.rule(f, a, b, subintervals, rule))
+}
+
+composite.gl.3 <- vapply(ms, function(m) composite.gauss.legendre(sin, 0, 10, m, 3), 0)
+composite.gl.3[log(abs(composite.gl.3 - val)) < -33] <- NA
+
+composite.gl.4 <- vapply(ms, function(m) composite.gauss.legendre(sin, 0, 10, m, 4), 0)
+composite.gl.4[log(abs(composite.gl.4 - val)) < -33] <- NA
+
+composite.gl.5 <- vapply(ms, function(m) composite.gauss.legendre(sin, 0, 10, m, 5), 0)
+composite.gl.5[log(abs(composite.gl.5 - val)) < -33] <- NA
+
+tg3 <- tibble(m=ms, rule="gauss-legendre 3", log.error=log(abs(composite.gl.3- val)),
+            theory=log(0.18*factorial(3)^4/factorial(2*3)^3/(2*3+1)*10^7/ms^6))
+tg4 <- tibble(m=ms, rule="gauss-legendre 4", log.error=log(abs(composite.gl.4- val)),
+            theory=log(0.18*factorial(4)^4/factorial(2*4)^3/(2*4+1)*10^9/ms^8))
+tg5 <- tibble(m=ms, rule="gauss-legendre 5", log.error=log(abs(composite.gl.5- val)),
+            theory=log(0.18*factorial(5)^4/factorial(2*5)^3/(2*5+1)*10^11/ms^10))
+tib <- bind_rows(tr, tt, tm, ts, tg3, tg4, tg5)
+ggplot(tib, aes(x=m, colour=rule)) + geom_point(aes(y=log.error), na.rm=TRUE) + geom_line(aes(y=theory))
+```
+We see that the Gauss-Legendre implementations offer a far quicker convergence rate compared to the previous best which was Simpson's rule.
 
 ### Practical algorithms
 The methods above can be enhanced by various adaptations and practical error estimation. They are designed to estimate bounds on the error and spend more computational effort in subintervals where the integral is estimated poorly. Defining a robust algorithm involves specifying change of variables for dealing with semi-infinite and infinite intervals. The weight function can also be varied to produce a better approximation. 
@@ -115,16 +287,124 @@ $$n^{1/2}\{n^{-1}S_{n}(f) - \mu(f) \} \rightarrow X \sim N(0, \mu(\bar{f}^{2})) 
 where $\bar{f}$ = f - \mu(f).
 
 ### Error compared to quadrature
-This i sa slow convergence rate compared to quadrature rules in one dimension. Dimension does not directly affect convergence however $\bar{f}$ can be very large for large $d$.
+This is a slow convergence rate compared to quadrature rules in one dimension. Dimension does not directly affect convergence however $\bar{f}$ can be very large for large $d$.
 
 ### Sampling
+#### Perfect sampling
 There are several sampling methods available. If we can simulate random variates $\pi$ on a computer then this is called perfect sampling. 
 
+#### Rejection sampling
 Another more applicable is rejection sampling. This applies when one can sample $\mu$-distributed random variates from proposal distribution $\mu$ and $\pi/\mu$ satisfies $\sup_{x\in X}\pi(x)/\mu(x) \leq M < \infty$.  The algorithm is:
 * Sample $X \sim \mu$
 
 * With probability $\frac{1}{M}\frac{\pi(X)}{\mu(X)}$ output X, otherwise go to step 1
 
-Rejection sampling works best when the proposal distribution is close to the true distribution but it is not required. In many practical applications $M$ is prohibitively large.
+Rejection sampling works best when the proposal distribution is close to the true distribution as this will cause more samples to be accepted however it is not required. In many practical applications $M$ is prohibitively large. A simple rejection sampling implementation is given below:
 
-We can also do importance sampling and self-normalized importance sampling.
+```{r rj}
+rejection.sample <- function(pi, mu, M) {
+  while (TRUE) {
+    x <- mu$sample()
+    y <- runif(1) < pi(x)/mu$density(x)/M
+    if (y) {
+      return(x)
+    }
+  }
+}
+```
+
+#### Importance sampliong
+Importance sampling assumes $\pi(x) > 0 \rightarrow \mu(x) > 0$. Importance sampling is motivated by expressing $\pi(f)$ as an integral w.r.t. $\mu$. We find $\pi(f) = \mu(f \cdot w)$ where $w(x) = \pi(x)/\mu(x)$. This justifies using $n^{-1}S_{n}(f \cdot w)$ as an approximation of $\pi(f)$. In many
+ cases importance sampling is used because it is not known how to sample $pi$-distributed random variables. In this case it is sufficient to have $w$ uniformly bounded to ensure $f \in L^{2}(X, \pi) \rightarrow f \cdot w \notin L^{2}(X, \mu)$. In high dimensions it is common for the variance to be prohibitively large for reasonable values of $n$.
+
+## Markov chain Monte Carlo
+Assume on measureable space $(X, \mathcal{X})$ and that $\mathcal{X}$ is countably generated. Let $\mathbf{X} := (X_{n})_{n \geq 0}$ be a discrete time Markov chain evolving on X for some initial $X_{0}$. This means for $A \in \mathcal{X}$:
+
+$$ P(X_{n} \in A|X_{0} = x_{0},...,X_{n-1}=x_{n-1}) = P(X_{n} \in A | X_{n-1} = x_{n-1}). $$
+
+Suppose $\mathbf{X}$ is a time-homogenous positive Harris Markovchain with invariant probability mesasure $\pi$. Then for all $ f \in L_{1}(X, \pi) = \{f:\pi(|f|) \leq \infty \},$
+
+$$ \lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \pi(f), $$
+
+almost surely for any initial distribution X_{0}.
+
+### Metropolis-Hastings
+The most commonly used Markov chains in practice are constructed using Metropolis-Hastings Markov transition kernels. 
+
+#### Algorithm
+Assume $\pi$ has a density w.r.t. some measure $\lambda$. For a target $\pi$ we only need to specifiy a proposal Markov kernel $Q$ admitting a density $q$ w.r.t. $\lambda$.
+$$ Q(x, dz) = q(x, z)\lambda(dz). $$
+
+To simulate according to $P_{MH}(x,\cdot)$:
+
+1. Simulate $Z \sim Q(x,\cdot)$
+
+2. With prob $\alpha_{MH}(x, Z)$ output $Z$. Otherwise output $x$. We define:
+$$ \alpha_{MH}(x, z) := \min \bigg{(}1, \frac{\pi(z)q(z,x)}{\pi(x)q(x, z)}\bigg{)} $$
+
+So we only need to be able to simulate from $Q(x,\cdot)$ and know the density $\pi$ up to a normalizing constant to simulate from $P_{MH}(x, \cdot)$. A common choice for the MH kernel is the normal distribution, in this  case $q$ is symmetric so $\alpha_{MH}(x ,z) = \min(1, \pi(z)/\pi(x))$.
+
+```{r MH}
+# Proposal must be a function that returns a random deviate some distibution i.e. rnorm, rbinom
+make_proposal <- function(proposal, ...) {
+  Q <- function() proposal(1, ...)
+}
+
+# Note: this simple implementation assumes symmetric proposal
+MH_chain <- function(pi, Q, init, n) {
+  x <- init
+  xs <- rep(0, n)
+  for (i in 1:n) {
+    z <- x + Q()
+    p <- min(1, pi(z)/pi(x))
+    x <- sample(c(x, z), size = 1, prob = c(1-p, p))
+    xs[i] <- x
+  }
+  return(xs)
+}
+```
+
+Then we can implement this to simulate a beta distribution with shape parameters $\alpha = 0.5, \beta = 0.5$.
+```{r MHimp}
+Q <- make_proposal(rnorm,mean = 0, sd = 1)
+pi <- function(x) dbeta(x, shape1 = 0.5, shape2 = 0.5)
+xs <- MH_chain(pi, Q, 0.5, 1000000)
+plot(density(xs))
+vs <- seq(0, 1, 0.01)
+lines(vs, dbeta(vs, 0.5, 0.5), col = "blue")
+```
+
+We can see the Metropolis Hastings produces a fairly close fit.
+
+Finally we look at how the proposal standard deviation controls the chain. We use medium jumps:
+
+```{r meddev}
+Q <- make_proposal(rnorm, sd = 1)
+xs <- MH_chain(dnorm, Q, 0, 1000)
+plot(xs)
+```
+
+Small jumps:
+```{r smalldev}
+Q <- make_proposal(rnorm, sd = 0.1)
+xs <- MH_chain(dnorm, Q, 0, 1000)
+plot(xs)
+```
+and large jumps:
+```{r bigdev}
+Q <- make_proposal(rnorm, sd = 10)
+xs <- MH_chain(dnorm, Q, 0, 1000)
+plot(xs)
+```
+
+It is important to cater jump sizes to the nature of the problem. 
+
+### Validitity 
+It order to show P leaves $\pi$ invariant we need to check $\pi P = \pi$. it can be shown that any $\pi$-reversible Markov chain is a stationary Markov chain with invariant probability $\pi$. We can also show that any Metropolis Hastings Markov chain is $\pi$-reversible.
+
+### Combining Markov kernels
+We can construct $\pi$-invariant Markov chains out of different $\pi$-invariant Markov transition kernels. Hybrid chains like this are common, such as the Gibbs sampler. A Markov kernel $P$ is a mixture of Markov kernels $(P_{s})_{s \in S}$ if:
+
+$$P(x, A) = \sum_{s \in S}w(s)P_{s}(x, A), $$
+
+where $w$ is a p.m.f. This can be used to construct more sophisticated Markov chains as we know a mixture of $\pi$-invariant Markov kernels is $\pi$-invariant.
