@@ -18,10 +18,10 @@ library(tidyverse)
 Quadratue rules are essentially integral approximations that use a finite number of function evaluations. We will focus on approximating the definite integral of $f$ over $[a,b]$. For one dimensional integrals you can use `integrate` in R. For multiple integrals the `cubature` package can be used. These should provide more robust implementations.
 
 ### Polynomial interpolation
-The **Weierstrass Approximation Theorem** states that for $f \in C^{0}([a,b])$ there is a sequence of polynomials $(p_{n})$ that converge uniformly to $f$ on $[a,b]$. This suggests that for a given tolerence there exists a polynomial that can be used to approximate a given $f$. 
+The **Weierstrass Approximation Theorem** states that for $f \in C^{0}([a,b])$ there is a sequence of polynomials $(p_{n})$ that converge uniformly to $f$ on $[a,b]$. This suggests that for a given tolerance there exists a polynomial that can be used to approximate a given $f$. 
 
 ### Lagrange polynomials
-An approximation can be done useing lagrange polynomials. Consider approximating $f$ using $k$ points $\{(x_{i}, f(x_{i}))\}_{i=1}^{k}$. The interpolating polynomial is unique and has degree at most $k-1$, it can be expressed as a Lagrange polynomial:
+An approximation can be done useing Lagrange polynomials. Consider approximating $f$ using $k$ points $\{(x_{i}, f(x_{i}))\}_{i=1}^{k}$. The interpolating polynomial is unique and has degree at most $k-1$, it can be expressed as a Lagrange polynomial:
 $$p_{k-1}(x) := \sum_{i=1}^{k}l_{i}(x)f(x_{i}),$$
 where the Lagrange polynomials are:
 $$l_{i}(x) = \prod_{j=1,j \neq i}\frac{x - x_{j}}{x_{i} - x_{j}} . $$
@@ -125,11 +125,11 @@ $$\hat{I}^m_{\rm rule}(f) = \sum_{i=1}^m \hat{I}_{\rm rule}(f_i), $$
 where $f_{i}$ is $f$ on $[a + (i-1)h,a+ih]$ and $h = \frac{b-a}{m}$.
 
 ### Gaussian quadrature
-Guassian quadrature is similar to Chebyshev points in that it exploits the freedom of interpolation points ot reduce the error of the approximate integral in the form:
+Guassian quadrature is similar to Chebyshev points in that it exploits the freedom of interpolation points to reduce the error of the approximate integral in the form:
 $$ I = \int_{a}^{n}f(x)w(x)dx $$
 where $w$ is continuous and positive on $(a,b)$ and $\forall n \in \mathbb{N},\int_{a}^{b}x^{n}w(x)dx$ is finite.  Defining the function space:
 $$ L_{w}^{2}([a,b]) := \Big{\{} f: \int_{a}^{b} f(x)^{2}w(x)dx < \infty \Big{\}} $$
-There exists a unique sequencce of orthogonal polynomials $p_{0},p_{1},...$ in $L_{w}^{2}([a,b])$ that are monic. These can be found using the **Gram-Schmidt process**. We choose the interpolation points as the $k$ roots of $p_{k}$ for the Gaussian quadrature rule. For a composite Gauss-Legendre rule we have:
+There exists a unique sequence of orthogonal polynomials $p_{0},p_{1},...$ in $L_{w}^{2}([a,b])$ that are monic. These can be found using the **Gram-Schmidt process**. We choose the interpolation points as the $k$ roots of $p_{k}$ for the Gaussian quadrature rule. For a composite Gauss-Legendre rule we have:
 
 $$ \hat{I}^{m}_{\rm Gauss-Legendre}(f) = \frac{(b-a)^{2k + 1}(k!)^{4}}{(2k + 1)\{ (2k)!\}^{3}}f^{(2k)}(\xi) $$
 
@@ -257,7 +257,7 @@ The methods above can be enhanced by various adaptations and practical error est
 ### Multiple integrals
 Consider an integral over $D = [a_{1}, b_{1}] \times ... \times [a_{d}, b_{d}]$:
 $$I(f) = \int_{D} f(x_{1},...,x_{d})d(x_{1},...,x_{d}).$$
-According to Fubini's Theorem, and letting $D' = [a_{2}, b_{2}] \times ... \times [a_{d}, b_{d}]$ can often rewrite $I(f)$ as an iterated integral:
+According to Fubini's Theorem, and letting $D' = [a_{2}, b_{2}] \times ... \times [a_{d}, b_{d}]$ we can often rewrite $I(f)$ as an iterated integral:
 $$ I(f) = \int_{a_{1}}^{b_{1}} \int_{D'} f(x_{1},...,x_{d}) d(x_{2},...,x_{d}) dx_{1} = \int_{a_{1}}^{b_{1}}g(x_{1}) dx_{1} $$
 We develop a recursive algorithm using an approximation of $g$ to approximate $I(f)$. 
 
@@ -272,7 +272,7 @@ Quadrature rules quickly become prohibitively expensive in high dimensional prob
 Letting $(X, \mathcal{X})$ be a measurable space. We have target probability measure $\pi: \mathcal{X} \rightarrow [0,1]$ and want to approximate:
 $$ \pi(f) := \int_{X}f(x)\pi(dx), $$
 
-where $f \in L_{1}(X, \pi) = \{f:\pi(|f|) < \infty \}$. This is equivalent to $\pi(f)$ is the expectation of $f(X)$ when $X \sim \pi$.
+where $f \in L_{1}(X, \pi) = \{f:\pi(|f|) < \infty \}$. This is equivalent to $\pi(f)$ being the expectation of $f(X)$ when $X \sim \pi$.
 
 ### Fundamental results:
 Let $(X_{n})_{n \geq 1}$ be a sequence of i.i.d. random variables distributed according to $\mu$. Define:
@@ -282,7 +282,7 @@ $$\lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \mu(f), $$
 
 We call this a Monte Carlo approximation of $\mu(f)$. This is an unbiased estimator. The variance of this estimate is $\frac{\mu(f^{2}) - \mu(f)^{2}}{n}$.
 
-Central limit theroem: If $f \in L_{2}(X, \mu)$ then:
+Central limit theorem: If $f \in L_{2}(X, \mu)$ then:
 $$n^{1/2}\{n^{-1}S_{n}(f) - \mu(f) \} \rightarrow X \sim N(0, \mu(\bar{f}^{2})) ,$$
 where $\bar{f}$ = f - \mu(f).
 
@@ -294,7 +294,8 @@ This is a slow convergence rate compared to quadrature rules in one dimension. D
 There are several sampling methods available. If we can simulate random variates $\pi$ on a computer then this is called perfect sampling. 
 
 #### Rejection sampling
-Another more applicable is rejection sampling. This applies when one can sample $\mu$-distributed random variates from proposal distribution $\mu$ and $\pi/\mu$ satisfies $\sup_{x\in X}\pi(x)/\mu(x) \leq M < \infty$.  The algorithm is:
+Another more applicable method is rejection sampling. This applies when one can sample $\mu$-distributed random variates from proposal distribution $\mu$ and $\pi/\mu$ satisfies $\sup_{x\in X}\pi(x)/\mu(x) \leq M < \infty$.  The algorithm is:
+
 * Sample $X \sim \mu$
 
 * With probability $\frac{1}{M}\frac{\pi(X)}{\mu(X)}$ output X, otherwise go to step 1
@@ -313,20 +314,20 @@ rejection.sample <- function(pi, mu, M) {
 }
 ```
 
-#### Importance sampliong
+#### Importance sampling
 Importance sampling assumes $\pi(x) > 0 \rightarrow \mu(x) > 0$. Importance sampling is motivated by expressing $\pi(f)$ as an integral w.r.t. $\mu$. We find $\pi(f) = \mu(f \cdot w)$ where $w(x) = \pi(x)/\mu(x)$. This justifies using $n^{-1}S_{n}(f \cdot w)$ as an approximation of $\pi(f)$. In many
- cases importance sampling is used because it is not known how to sample $pi$-distributed random variables. In this case it is sufficient to have $w$ uniformly bounded to ensure $f \in L^{2}(X, \pi) \rightarrow f \cdot w \notin L^{2}(X, \mu)$. In high dimensions it is common for the variance to be prohibitively large for reasonable values of $n$.
+ cases importance sampling is used because it is not known how to sample $\pi$-distributed random variables. In this case it is sufficient to have $w$ uniformly bounded to ensure $f \in L^{2}(X, \pi) \rightarrow f \cdot w \notin L^{2}(X, \mu)$. In high dimensions it is common for the variance to be prohibitively large for reasonable values of $n$.
 
 ## Markov chain Monte Carlo
-Assume on measureable space $(X, \mathcal{X})$ and that $\mathcal{X}$ is countably generated. Let $\mathbf{X} := (X_{n})_{n \geq 0}$ be a discrete time Markov chain evolving on X for some initial $X_{0}$. This means for $A \in \mathcal{X}$:
+Assume we are on measureable space $(X, \mathcal{X})$ and that $\mathcal{X}$ is countably generated. Let $\mathbf{X} := (X_{n})_{n \geq 0}$ be a discrete time Markov chain evolving on X for some initial $X_{0}$. This means for $A \in \mathcal{X}$:
 
 $$ P(X_{n} \in A|X_{0} = x_{0},...,X_{n-1}=x_{n-1}) = P(X_{n} \in A | X_{n-1} = x_{n-1}). $$
 
-Suppose $\mathbf{X}$ is a time-homogenous positive Harris Markovchain with invariant probability mesasure $\pi$. Then for all $ f \in L_{1}(X, \pi) = \{f:\pi(|f|) \leq \infty \},$
+Suppose $\mathbf{X}$ is a time-homogenous, positive Harris Markov chain with invariant probability measure $\pi$. Then for all $f \in L_{1}(X, \pi) = \{ f:\pi(|f|) \leq \infty \}$,
 
 $$ \lim_{n \rightarrow \infty} \frac{1}{n}S_{n}(f) = \pi(f), $$
 
-almost surely for any initial distribution X_{0}.
+almost surely for any initial distribution $X_{0}$.
 
 ### Metropolis-Hastings
 The most commonly used Markov chains in practice are constructed using Metropolis-Hastings Markov transition kernels. 
@@ -400,7 +401,7 @@ plot(xs)
 It is important to cater jump sizes to the nature of the problem. 
 
 ### Validitity 
-It order to show P leaves $\pi$ invariant we need to check $\pi P = \pi$. it can be shown that any $\pi$-reversible Markov chain is a stationary Markov chain with invariant probability $\pi$. We can also show that any Metropolis Hastings Markov chain is $\pi$-reversible.
+In order to show P leaves $\pi$ invariant we need to check $\pi P = \pi$. it can be shown that any $\pi$-reversible Markov chain is a stationary Markov chain with invariant probability $\pi$. We can also show that any Metropolis Hastings Markov chain is $\pi$-reversible.
 
 ### Combining Markov kernels
 We can construct $\pi$-invariant Markov chains out of different $\pi$-invariant Markov transition kernels. Hybrid chains like this are common, such as the Gibbs sampler. A Markov kernel $P$ is a mixture of Markov kernels $(P_{s})_{s \in S}$ if:

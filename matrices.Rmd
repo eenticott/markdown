@@ -48,7 +48,7 @@ The decimal equivalent is $(-1)^s \times 2^{e - 1023} \times 1.m$. We expect an 
 0.1 + 0.2 - 0.3
 ```
 
-To account for numerical innaccuracy can use `all.equal` instead. These errors compound within matrix multiplication so can often have larger errors. `Solve(A,b)` incurs less numerical error than `solve(A)`. Eigenvalues can also involve high numerical error, if you know a input is symmetric this should be specified in the input argument.
+To account for numerical innaccuracy we can use `all.equal` instead. These errors compound within matrix multiplication so can often have larger errors. `Solve(A,b)` incurs less numerical error than `solve(A)`. Eigenvalues can also involve high numerical error, if you know an input is symmetric this should be specified in the input argument.
 
 ## Sparse Matrices
 Sparse and dense matrices can be accessed with the `Matrix` package. Dense matrices are stored as `dgeMatrix`. It adds the `rankMatrix` and `rcond` functions. A sparse matrix is one where most entries are 0. It is inefficient to store all these 0's in the memory. Sparse matrices are generally stored as `dgCMatrix`. d stands for digit, g for general (not triangular or symmetric) and C for column (not row or triplet). A sparse matrix can be converted to dense at the cost of increased memory storage. A `dgCMatrix` is stored using the compressed sparse column (CSC) format. This stores the length of runs of zeros and non-zero entries. 
@@ -70,7 +70,7 @@ We can see the sparse format is far more efficient with memory usage.
 Multiplication and division retain the `dgCMatrix` format but addition or subtraction turn `dgC` into `dge`. A sparse matrix multiplied by a dense vector outputs a `dge` but two sparse matrices can be multiplied together and retain sparsity.
 
 ### Obtaining the dependency graph of R packages.
-We can use the `miniCRAN` package to build an `R` package depenedncy graph. This can be represented via an adjacency matrix `M`. The matrix is square with each row and column relating to a vertex. If there is an edge from $i$ to $j$ then $M_{i,j} =1$ else the entry is 0. Thus $M$ is usually sparse. We look at the dependencies of `rmarkdown` below: 
+We can use the `miniCRAN` package to build an `R` package dependency graph. This can be represented via an adjacency matrix `M`. The matrix is square with each row and column relating to a vertex. If there is an edge from $i$ to $j$ then $M_{i,j} =1$ else the entry is 0. Thus $M$ is usually sparse. We look at the dependencies of `rmarkdown` below: 
 
 ```{r package}
 library(miniCRAN) # for obtaining dependency relations of R packages

@@ -418,7 +418,7 @@ curve(f, from = -3, to = 3)</code></pre>
 </div>
 <div id="newtons-method" class="section level3">
 <h3>Newton’s Method</h3>
-<p>This aims to find the root of a function <span class="math inline">\(g\)</span>, it relies on the Taylor expansion at <span class="math inline">\(x_{0}\)</span>. We iterively apply: <span class="math display">\[x \leftarrow x - \frac{g(x)}{g&#39;(x)} \]</span> To apply to an optimisation problem, we solve for <span class="math inline">\(f&#39;(x)\)</span> = 0. If the initial guess is close to a local minimum then the convergence is rapid but if it is far away it can converge to any local minimum or maximum. It also requires second derivatives which are not always available. We apply this to the same function:</p>
+<p>This aims to find the root of a function <span class="math inline">\(g\)</span>, it relies on the Taylor expansion at <span class="math inline">\(x_{0}\)</span>. We iteratively apply: <span class="math display">\[x \leftarrow x - \frac{g(x)}{g&#39;(x)} \]</span> To apply to an optimisation problem, we solve for <span class="math inline">\(f&#39;(x)\)</span> = 0. If the initial guess is close to a local minimum then the convergence is rapid but if it is far away it can converge to any local minimum or maximum. It also requires second derivatives which are not always available. We apply this to the same function:</p>
 <pre class="r"><code>f_sym = expression(2*sin(3*x) + 0.4*x^2 - 2)
 f1_sym = D(f_sym, &#39;x&#39;); f1 = function(x) eval(f1_sym)
 f2_sym = D(f1_sym, &#39;x&#39;); f2 = function(x) eval(f2_sym)
@@ -442,7 +442,7 @@ newton(f1_sym, f2_sym, 1, 1e-6, TRUE)</code></pre>
 ## -1.644482 
 ## -1.644483</code></pre>
 <pre><code>## [1] -1.644483</code></pre>
-<p>We can see that it has converged to a local maximum instead of a minimum. We try with differnet starting values:</p>
+<p>We can see that it has converged to a local maximum instead of a minimum. We try with different starting values:</p>
 <pre class="r"><code>for (i in seq(-3, 3, 0.5)) {
   print(newton(f1_sym, f2_sym, i, 1e-6, FALSE))
 }</code></pre>
@@ -467,7 +467,7 @@ newton(f1_sym, f2_sym, 1, 1e-6, TRUE)</code></pre>
 <ul>
 <li><p>Simplex methods - only use value of the function</p></li>
 <li><p>Gradient type methods - use value of function and gradient vector</p></li>
-<li><p>Newton type methods - Use value of function, gradient vector and Hessian matrix (or approximation)</p></li>
+<li><p>Newton type methods - use value of function, gradient vector and Hessian matrix (or approximation)</p></li>
 </ul>
 <p>In <code>R</code> these optimisations can be done through the <code>nlm</code> function which uses a Newton-type or <code>optim</code> which has a choice.</p>
 <p>We will attempt to minimise the problem:</p>
@@ -571,7 +571,7 @@ NM</code></pre>
 </div>
 <div id="gradient-type-methods" class="section level4">
 <h4>Gradient type methods</h4>
-<p>The most popular method here is gradient descent. In order to minimise a differentiable function <span class="math inline">\(f(x)\)</span> we iterively take: <span class="math display">\[x \leftarrow x - \gamma\nabla f(x) \]</span> where <span class="math inline">\(\gamma\)</span> is a small step value. This is simple but is slow can can zigzag on certain functions. <code>optim</code> uses the conjugate gradient (CG) which is an improved version. The main idea is that each step should be conjugate toward search directions at previous step to avoid zigzag. If the function is quadratic then CG is guaranteed to reach the minimum in n-steps where function is n-dimensional. It performs better than steepest descent in all cases but not as well as Newton type methods.</p>
+<p>The most popular method here is gradient descent. In order to minimise a differentiable function <span class="math inline">\(f(x)\)</span> we iteratively take: <span class="math display">\[x \leftarrow x - \gamma\nabla f(x) \]</span> where <span class="math inline">\(\gamma\)</span> is a small step value. This is simple but is slow can can zigzag on certain functions. <code>optim</code> uses the conjugate gradient (CG) which is an improved version. The main idea is that each step should be conjugate to the search direction at the previous step to avoid zigzag. If the function is quadratic then CG is guaranteed to reach the minimum in n-steps where function is n-dimensional. It performs better than steepest descent in all cases but not as well as Newton type methods.</p>
 <pre class="r"><code>start = Sys.time()
 CG &lt;- optim(c(1, 1), function(x) f(x[1], x[2]), method = &quot;CG&quot;)
 end = Sys.time()
@@ -667,23 +667,23 @@ SANN</code></pre>
 <pre class="r"><code>optim_results</code></pre>
 <pre><code>##                   minimum       times
 ## nlm_with_grad 0.003000021 0.003000021
-## nlm_no_grad   0.003000975 0.003000975
-## Nelder-Mead   1.560592049 0.003000021
-## CG            1.560592035 0.004000187
+## nlm_no_grad   0.002000093 0.002000093
+## Nelder-Mead   1.560592049 0.003000975
+## CG            1.560592035 0.002999783
 ## BFGS          3.786106059 0.003000975
-## L-BFGS-B      1.560592035 0.001999855
-## SANN          1.560608650 0.021003962</code></pre>
+## L-BFGS-B      1.560592035 0.002999067
+## SANN          1.560608650 0.021004915</code></pre>
 <p>We see that for time taken, all the functions perform similarly in this case apart from simulated annealing which takes just over twice as long as the next slowest. Surprisingly BFGS also seems to have encountered some problems as it does not converge to the correct point and ran slightly slower, though the low memory version did converge correctly. Neither of the <code>nlm</code> implementations found the correct minimum although as it is smaller than the expected minimum it seems they have found one outside the area in which we were looking. As we are only looking at minimising one function here these results are far from conclusive as to the performance of the relative functions.</p>
 </div>
 </div>
 <div id="nonlinear-least-squares-problems" class="section level3">
 <h3>Nonlinear least squares problems</h3>
 <p>With dataset <span class="math inline">\((x_{1}, y_{1}), ...,(x_{m}, y_{m})\)</span> and model <span class="math inline">\(y = f(x, \beta)\)</span> where <span class="math inline">\(\beta\)</span> are the parameters of the model <span class="math inline">\(f\)</span> we define residuals <span class="math inline">\(r_{i} (\beta) = y_{i} - f(x_{i}, \beta)\)</span>. In a nonlinear least squares problem we aim to find <span class="math inline">\(\beta\)</span> such that the sum of squared residuals is minimised. There a subclass of optimisation algorithms designed for nonlinear functions.</p>
-<p>The Gauss-Newton algorithm is related to Newton’s method. The difference is that Gauss-Newton approximates the Hesian matrix of the objective functoin using Jacobian matrix <span class="math inline">\(J_{r}\)</span> of the residue function. It approximates the Hesian with <span class="math inline">\(J_{r}^{t}J_{r}\)</span> and then iterively does: <span class="math display">\[\beta \leftarrow \beta - (J_{r}^{t}J_{r})^{-1}J_{r}^{t}r(\beta)\]</span> This works well in practice but is not guaranteed to converge. The Levenberg-Marquadt algorithm addresses this using damping, instead pretending the Hessian is <span class="math inline">\(J_{r}^{t}J_{r} + \lambda I\)</span>. This is guaranteed to be invertible for some <span class="math inline">\(\lambda\)</span>.</p>
+<p>The Gauss-Newton algorithm is related to Newton’s method. The difference is that Gauss-Newton approximates the Hessian matrix of the objective function using Jacobian matrix <span class="math inline">\(J_{r}\)</span> of the residue function. It approximates the Hessian with <span class="math inline">\(J_{r}^{t}J_{r}\)</span> and then iteratively does: <span class="math display">\[\beta \leftarrow \beta - (J_{r}^{t}J_{r})^{-1}J_{r}^{t}r(\beta)\]</span> This works well in practice but is not guaranteed to converge. The Levenberg-Marquadt algorithm addresses this using damping, instead pretending the Hessian is <span class="math inline">\(J_{r}^{t}J_{r} + \lambda I\)</span>. This is guaranteed to be invertible for some <span class="math inline">\(\lambda\)</span>.</p>
 </div>
 <div id="stochastic-gradient-descent" class="section level3">
 <h3>Stochastic gradient descent</h3>
-<p>So far the algorithms have all computed gradient vectors using all of the dataset. In big data applications, the dataset can be too large to hold in memory. This motivates Stochastic Gradient Descent (SGD). This takes the gradient direction using only a few data samples. It is popular for training neural networks where full back propogation is computationally expensive. The simplest form is: <span class="math display">\[\beta \leftarrow \beta - \gamma r_{i} \nabla r_{i}(\beta)\]</span> where <span class="math inline">\(i\)</span> cycles through all data points. It can also be done by combining data samples into ‘minibatches’ and updating <span class="math inline">\(\beta\)</span> with the samples in each minibatch.</p>
+<p>So far the algorithms have all computed gradient vectors using all of the dataset. In big data applications, the dataset can be too large to hold in memory. This motivates Stochastic Gradient Descent (SGD). This takes the gradient direction using only a few data samples. It is popular for training neural networks where full back propagation is computationally expensive. The simplest form is: <span class="math display">\[\beta \leftarrow \beta - \gamma r_{i} \nabla r_{i}(\beta)\]</span> where <span class="math inline">\(i\)</span> cycles through all data points. It can also be done by combining data samples into ‘minibatches’ and updating <span class="math inline">\(\beta\)</span> with the samples in each minibatch.</p>
 </div>
 </div>
 

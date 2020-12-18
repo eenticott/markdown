@@ -414,7 +414,7 @@ norm(A %*% solve(A, b) - b)</code></pre>
 <p>The decimal equivalent is <span class="math inline">\((-1)^s \times 2^{e - 1023} \times 1.m\)</span>. We expect an error of order <span class="math inline">\(10^{-16}\)</span> in numerical representations of double numbers. A simple example to demonstrate this is:</p>
 <pre class="r"><code>0.1 + 0.2 - 0.3</code></pre>
 <pre><code>## [1] 5.551115e-17</code></pre>
-<p>To account for numerical innaccuracy can use <code>all.equal</code> instead. These errors compound within matrix multiplication so can often have larger errors. <code>Solve(A,b)</code> incurs less numerical error than <code>solve(A)</code>. Eigenvalues can also involve high numerical error, if you know a input is symmetric this should be specified in the input argument.</p>
+<p>To account for numerical innaccuracy we can use <code>all.equal</code> instead. These errors compound within matrix multiplication so can often have larger errors. <code>Solve(A,b)</code> incurs less numerical error than <code>solve(A)</code>. Eigenvalues can also involve high numerical error, if you know an input is symmetric this should be specified in the input argument.</p>
 </div>
 </div>
 <div id="sparse-matrices" class="section level2">
@@ -439,7 +439,7 @@ m1[1:2, 1:10]</code></pre>
 </div>
 <div id="obtaining-the-dependency-graph-of-r-packages." class="section level3">
 <h3>Obtaining the dependency graph of R packages.</h3>
-<p>We can use the <code>miniCRAN</code> package to build an <code>R</code> package depenedncy graph. This can be represented via an adjacency matrix <code>M</code>. The matrix is square with each row and column relating to a vertex. If there is an edge from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> then <span class="math inline">\(M_{i,j} =1\)</span> else the entry is 0. Thus <span class="math inline">\(M\)</span> is usually sparse. We look at the dependencies of <code>rmarkdown</code> below:</p>
+<p>We can use the <code>miniCRAN</code> package to build an <code>R</code> package dependency graph. This can be represented via an adjacency matrix <code>M</code>. The matrix is square with each row and column relating to a vertex. If there is an edge from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> then <span class="math inline">\(M_{i,j} =1\)</span> else the entry is 0. Thus <span class="math inline">\(M\)</span> is usually sparse. We look at the dependencies of <code>rmarkdown</code> below:</p>
 <pre class="r"><code>library(miniCRAN) # for obtaining dependency relations of R packages
 g1 &lt;- miniCRAN::makeDepGraph(&#39;rmarkdown&#39;, suggests = FALSE, enhances = FALSE)
 plot(g1)</code></pre>

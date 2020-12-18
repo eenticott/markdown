@@ -30,7 +30,7 @@ A minimum working example is what you would need to submit with a bug report if 
 
 ### Example
 
-We attempt to build another function that finds prime factors. We have the following:
+We attempt to build a function that finds prime factors. We have the following:
 ```{r pf}
 prime_factors2 <- function(n){
   factors <- c()
@@ -119,13 +119,15 @@ Profiling in R can be done through the `profvis` package which builds upon R's `
 library(profvis)
 ```
 
-This is a statistical profiler. It operates by using operating system interupts to determine what code is being executed. This allows a picture to built of where the computation is spending most of its time. 
+This is a statistical profiler. It operates by using operating system interrupts to determine what code is being executed. This allows a picture to built of where the computation is spending most of its time. 
 
-Statistical profilers are similiar to instrumenting profilers whihc increment counters whenever functions are called however these often require more overhead than the statistical profilers at the benefit of more accuracy. 
+Statistical profilers are similiar to instrumenting profilers which increment counters whenever functions are called however these often require more overhead than the statistical profilers at the benefit of more accuracy. 
 
 These tools are useful for understanding performance and checking the robustness of code. 
 
 ### Example
+We compare the new prime factors function `prime_factors2` to the one that we created in the first portfolio.
+
 ```{r prof2}
 source("prime_factors1.R", keep.source = TRUE)
 profvis(prime_factors(12416515098))
@@ -142,7 +144,7 @@ R code is often not optimal in terms of performance, writing in C would run fast
 A main feature of R is its pass-by-value semantics. This makes the language easy to use but more difficult to write code that performs well. There are hidden optimizations in R that improve performance. When you update elements of an array in a for loop, multiple copies of the array are not made. This would make time complexity $O(n^2)$. Though small changes that would not affect pass-by-reference can cause multiple copies of an array to be made. This can happen when updating a vector with a function. 
 
 ### Column-major storage
-When a matrix is stored in memory it is typically mapped to a contiguous block of memory. This is done by coloum-major or row-major storage. R uses column-major order, which means that elements in each column are stored in contiguous blocks. This has an implication on performance. For example a matrix filled by row will take longer than a matrix stored by column. This is because reading and writing memory in contiguous blocks is faster than reading memory in seperate locations. 
+When a matrix is stored in memory it is typically mapped to a contiguous block of memory. This is done by coloum-major or row-major storage. R uses column-major order, which means that elements in each column are stored in contiguous blocks. This has an implication on performance. For example a matrix filled by row will take longer than a matrix stored by column. This is because reading and writing memory in contiguous blocks is faster than reading memory in separate locations. 
 
 ### Code in another languague
 It is possible to call code that is written in another language (for example C) from `R` using the `Rcpp` function. This is an important way to improve performance.
